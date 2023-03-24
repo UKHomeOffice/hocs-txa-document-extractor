@@ -25,8 +25,6 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-json'
-    implementation 'com.vladmihalcea:hibernate-types-55:2.21.1'
-    implementation "com.google.guava:guava:31.1-jre"
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'net.javacrumbs.json-unit:json-unit-assertj:2.36.1'
 }
