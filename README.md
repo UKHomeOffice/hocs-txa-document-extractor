@@ -1,6 +1,6 @@
-# hocs-cdlz-document-extractor
+# hocs-txa-document-extractor
 
-[![CodeQL](https://github.com/UKHomeOffice/hocs-cdlz-document-extractor/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/UKHomeOffice/hocs-cdlz-document-extractor/actions/workflows/codeql-analysis.yml)
+[![CodeQL](https://github.com/UKHomeOffice/hocs-txa-document-extractor/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/UKHomeOffice/hocs-txa-document-extractor/actions/workflows/codeql-analysis.yml)
 
 
 ## Versioning

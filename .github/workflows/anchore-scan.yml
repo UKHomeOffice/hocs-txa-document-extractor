@@ -12,5 +12,5 @@ jobs:
   scan:
     uses: UKHomeOffice/sas-github-workflows/.github/workflows/anchore-gradle.yml@v1
     with:
-      image: 'quay.io/ukhomeofficedigital/hocs-cdlz-document-extractor'
+      image: 'quay.io/ukhomeofficedigital/hocs-txa-document-extractor'
     secrets: inherit
