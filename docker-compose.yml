@@ -1,0 +1,15 @@
+---
+version: '1'  # Local stack for testing txa-decs-interface
+services:
+
+  postgres:
+    hostname: postgres
+    container_name: postgres
+    build:
+      dockerfile: postgres.Dockerfile
+      context: .
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
