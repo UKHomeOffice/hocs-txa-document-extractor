@@ -28,17 +28,13 @@ public class DataSourceConfiguration {
     }
 
     @Bean("metadataSource")
+    @ConfigurationProperties("document-metadata")
     public DataSource metadataSource() {
         /*
         The data source containing the metadata of documents we wish
         to extract.
-        TODO: make the host/database/user/pw come from config/env vars
          */
         PGSimpleDataSource metaSource = new PGSimpleDataSource();
-        metaSource.setServerName("localhost");
-        metaSource.setDatabaseName("postgres");
-        metaSource.setUser("postgres"); // user for containerised testing db only
-        metaSource.setPassword("admin");  // password for containerised testing db only
         return metaSource;
     }
 

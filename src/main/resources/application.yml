@@ -1,5 +1,28 @@
+info:
+  app_name: hocs-txa-document-extractor
+  environment: default
+
+document-metadata:
+  driver: org.postgresql.Driver
+  ServerName: ${METADATA_SOURCE_HOST:localhost}
+  DatabaseName: ${METADATA_SOURCE_DATABASE:postgres}
+  PortNumber: ${METADATA_SOURCE_PORT:5432}
+  User: ${METADATA_SOURCE_USER:postgres}
+  Password: ${METADATA_SOURCE_PASSWORD:admin}
+  metadata_schema: ${METADATA_SOURCE_SCHEMA:metadata}
+  metadata_table: ${METADATA_SOURCE_TABLE:document_metadata}
+
+s3:
+  source_bucket: ${S3_SOURCE_BUCKET:s3://trusted-bucket}
+  target_bucket: ${S3_TARGET_BUCKET:s3://untrusted-bucket}
+  endpoint_url: ${S3_ENDPOINT_URL:http://s3.localhost.localstack.cloud:4566}
+
+kafka:
+  bootstrap_servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  ingest_topic: ${KAFKA_INGEST_TOPIC:decs-ingest}
+  delete_topic: ${KAFKA_DELETE_TOPIC:decs-delete}
+
 spring-batch-db:
   datasource:
-    jdbc-url: jdbc:h2:mem:testdb
+    jdbc-url: jdbc:h2:mem:jobstate
     driver-class-name: org.h2.Driver
-    auto-commit: false
