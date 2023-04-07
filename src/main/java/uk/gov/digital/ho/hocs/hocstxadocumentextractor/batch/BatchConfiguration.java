@@ -9,6 +9,7 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -16,9 +17,15 @@ import uk.gov.digital.ho.hocs.hocstxadocumentextractor.documents.DocumentRow;
 import uk.gov.digital.ho.hocs.hocstxadocumentextractor.documents.DocumentRowMapper;
 
 import javax.sql.DataSource;
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 public class BatchConfiguration {
+
+    private @Value("${document-metadata.metadata_schema}") String metadataSchema;
+    private @Value("${document-metadata.metadata_table}") String metadataTable;
+    private @Value("${document-metadata.fetch_size}") Integer fetchSize;
 
     @Bean
     public JdbcCursorItemReader<DocumentRow> reader(@Qualifier("metadataSource") DataSource metadataSource) {
@@ -33,15 +40,18 @@ public class BatchConfiguration {
                 relevant_document,
                 s3_key
             FROM
-                metadata.document_metadata
+                $schema.$table
             WHERE
                 relevant_document = 'Y'
                 AND uploaded_date >= '2023-03-22 00:00:00'::timestamp
-            """;
+            ORDER BY uploaded_date ASC;
+            """
+            .replace("$schema", metadataSchema)
+            .replace("$table", metadataTable);
 
         return new JdbcCursorItemReaderBuilder<DocumentRow>()
             .dataSource(metadataSource)
-            .fetchSize(2)
+            .fetchSize(fetchSize)
             .name("documentReader")
             .sql(document_query)
             .rowMapper(new DocumentRowMapper())

@@ -11,6 +11,9 @@ document-metadata:
   Password: ${METADATA_SOURCE_PASSWORD:admin}
   metadata_schema: ${METADATA_SOURCE_SCHEMA:metadata}
   metadata_table: ${METADATA_SOURCE_TABLE:document_metadata}
+  fetch_size: ${METADATA_FETCH_SIZE:2}
+  last_ingest: ${METADATA_LAST_INGEST:null}
+  last_delete: ${METADATA_LAST_DELETE:null}
 
 s3:
   source_bucket: ${S3_SOURCE_BUCKET:s3://trusted-bucket}
