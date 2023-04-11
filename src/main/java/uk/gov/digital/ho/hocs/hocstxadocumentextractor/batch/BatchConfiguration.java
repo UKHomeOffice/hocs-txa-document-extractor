@@ -34,7 +34,6 @@ public class BatchConfiguration {
     public JdbcCursorItemReader<DocumentRow> reader(@Qualifier("metadataSource") DataSource metadataSource) {
         /*
         Read rows from the metadataSource.
-        TODO: parametrise from config (fetchSize, schema/table)
          */
         String document_query = """
             SELECT
