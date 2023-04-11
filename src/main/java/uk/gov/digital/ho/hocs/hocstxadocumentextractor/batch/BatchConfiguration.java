@@ -89,13 +89,15 @@ public class BatchConfiguration {
                          PlatformTransactionManager transactionManager,
                          JdbcCursorItemReader<DocumentRow> reader,
                          S3ItemProcessor processor,
-                         DocumentItemWriter writer) {
+                         DocumentItemWriter writer,
+                         NoWorkStepExecutionListener listener) {
         return new StepBuilder("mainStep", jobRepository)
                 .startLimit(1)
                 .<DocumentRow, DocumentRow> chunk(2, transactionManager)
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
+                .listener(listener)
                 .build();
     }
 
