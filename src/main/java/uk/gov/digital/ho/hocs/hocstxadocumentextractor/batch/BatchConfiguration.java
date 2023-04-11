@@ -26,6 +26,9 @@ public class BatchConfiguration {
     private @Value("${document-metadata.metadata_schema}") String metadataSchema;
     private @Value("${document-metadata.metadata_table}") String metadataTable;
     private @Value("${document-metadata.fetch_size}") Integer fetchSize;
+    private @Value("${s3.source_bucket}") String sourceBucket;
+    private @Value("${s3.target_bucket}") String targetBucket;
+    private @Value("${s3.endpoint_url}") String endpointURL;
 
     @Bean
     public JdbcCursorItemReader<DocumentRow> reader(@Qualifier("metadataSource") DataSource metadataSource) {
@@ -59,8 +62,9 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public DocumentItemProcessor processor() {
-        return new DocumentItemProcessor();
+    public S3ItemProcessor processor() {
+        //return new DocumentItemProcessor();
+        return new S3ItemProcessor(sourceBucket, targetBucket, endpointURL);
     }
 
     @Bean
@@ -84,7 +88,7 @@ public class BatchConfiguration {
     public Step mainStep(JobRepository jobRepository,
                          PlatformTransactionManager transactionManager,
                          JdbcCursorItemReader<DocumentRow> reader,
-                         DocumentItemProcessor processor,
+                         S3ItemProcessor processor,
                          DocumentItemWriter writer) {
         return new StepBuilder("mainStep", jobRepository)
                 .startLimit(1)

@@ -22,6 +22,8 @@ dependencies {
     annotationProcessor 'org.springframework:spring-context-indexer:5.3.23'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     compileOnly 'org.projectlombok:lombok'
+    implementation platform('software.amazon.awssdk:bom:2.20.43')
+    implementation 'software.amazon.awssdk:s3'
     implementation 'org.springframework.boot:spring-boot-starter-batch'
     implementation 'org.postgresql:postgresql:42.5.4'
     runtimeOnly 'com.h2database:h2:2.1.214'

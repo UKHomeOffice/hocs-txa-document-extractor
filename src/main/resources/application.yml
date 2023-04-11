@@ -16,8 +16,8 @@ document-metadata:
   last_delete: ${METADATA_LAST_DELETE:null}
 
 s3:
-  source_bucket: ${S3_SOURCE_BUCKET:s3://trusted-bucket}
-  target_bucket: ${S3_TARGET_BUCKET:s3://untrusted-bucket}
+  source_bucket: ${S3_SOURCE_BUCKET:trusted-bucket}
+  target_bucket: ${S3_TARGET_BUCKET:untrusted-bucket}
   endpoint_url: ${S3_ENDPOINT_URL:http://s3.localhost.localstack.cloud:4566}
 
 kafka:
