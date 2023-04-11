@@ -11,9 +11,13 @@ document-metadata:
   Password: ${METADATA_SOURCE_PASSWORD:admin}
   metadata_schema: ${METADATA_SOURCE_SCHEMA:metadata}
   metadata_table: ${METADATA_SOURCE_TABLE:document_metadata}
+  # fetch_size determines how many records are fetched from the database
   fetch_size: ${METADATA_FETCH_SIZE:2}
-  last_ingest: ${METADATA_LAST_INGEST:null}
-  last_delete: ${METADATA_LAST_DELETE:null}
+  # chunk_size determines how many records are read/processed before writing
+  chunk_size: ${METADATA_CHUNK_SIZE:2}
+  # Timestamps are expected as strings in format "YYYY-MM-DD HH:mm:SS"
+  last_ingest: ${METADATA_LAST_INGEST:}
+  last_delete: ${METADATA_LAST_DELETE:}
 
 s3:
   source_bucket: ${S3_SOURCE_BUCKET:trusted-bucket}

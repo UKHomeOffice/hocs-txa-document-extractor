@@ -33,6 +33,8 @@ public class DataSourceConfiguration {
         /*
         The data source containing the metadata of documents we wish
         to extract.
+        DataSource settings are set directly from the document-metadata section of
+        the application.yml
          */
         PGSimpleDataSource metaSource = new PGSimpleDataSource();
         return metaSource;

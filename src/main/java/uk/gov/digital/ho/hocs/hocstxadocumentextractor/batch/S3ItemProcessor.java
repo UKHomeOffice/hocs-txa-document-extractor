@@ -24,8 +24,10 @@ public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> 
     private S3Client s3Client;
 
     S3ItemProcessor(String sourceBucket, String targetBucket, String endpointURL){
-        log.info("Constructing S3ItemProcessor to transfer objects from: " + sourceBucket);
-        log.info("To: " + targetBucket);
+        /*
+        Responsible for copying files between two S3 buckets.
+         */
+        log.info("Constructing S3ItemProcessor to transfer objects from: " + sourceBucket + " to: " + targetBucket);
 
         this.sourceBucket = sourceBucket;
         this.targetBucket = targetBucket;
