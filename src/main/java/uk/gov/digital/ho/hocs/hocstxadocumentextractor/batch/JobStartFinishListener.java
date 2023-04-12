@@ -1,11 +1,14 @@
 package uk.gov.digital.ho.hocs.hocstxadocumentextractor.batch;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -16,7 +19,7 @@ public class JobStartFinishListener implements JobExecutionListener {
 
     JobStartFinishListener(String targetBucket,
                            String endpointURL,
-                           String lastIngest) {
+                           String lastIngest) throws URISyntaxException {
         this.timestampManager = new S3TimestampManager(targetBucket, endpointURL, lastIngest);
     }
 
@@ -24,7 +27,14 @@ public class JobStartFinishListener implements JobExecutionListener {
     public void beforeJob(JobExecution jobExecution) {
         // Get timestamp
         log.info("Executing beforeJob tasks...");
-        String lastSuccessfulCollection = this.timestampManager.getTimestamp();
+        String lastSuccessfulCollection = null;
+        try {
+            lastSuccessfulCollection = this.timestampManager.getTimestamp();
+        } catch (IOException e) {
+            log.error("Could not parse the metadata.json read from S3, cannot recover.");
+            log.error(e.toString());
+            System.exit(1);
+        }
         log.info("Storing timestamp in job execution context");
         jobExecution.getExecutionContext().putString("lastSuccessfulCollection", lastSuccessfulCollection);
     }
@@ -42,12 +52,20 @@ public class JobStartFinishListener implements JobExecutionListener {
         // Put timestamp
         log.info("Getting last recorded checkpoint from JobExecutionContext");
         String checkpointTimestamp = jobExecution.getExecutionContext().getString("lastSuccessfulCollection");
-        boolean success = this.timestampManager.putTimestamp(checkpointTimestamp);
+        boolean success;
+        try {
+            success = this.timestampManager.putTimestamp(checkpointTimestamp);
+        } catch (JsonProcessingException e) {
+            log.error("Could not create an updated metadata.json, cannot recover");
+            log.error(e.toString());
+            success = false;
+        }
         if (success) {
             log.info("checkpointTimestamp successfully updated to: " + checkpointTimestamp);
         }
         else {
             log.error("committing the checkpointTimestamp failed");
+            log.error("the next execution of the job will reprocesses uncommitted records");
         }
 
         // Notify
@@ -63,14 +81,21 @@ public class JobStartFinishListener implements JobExecutionListener {
         log.info(String.format("docs/seconds~%.2f", docsPerSecond));
         log.info("Sending job outcome notifications...");
 
-        if(jobExecution.getStatus() == BatchStatus.COMPLETED) {
+        if(jobExecution.getStatus() == BatchStatus.COMPLETED && success) {
+            /*
+            All records successfully read, processed, written
+            AND the timestamp of the latest record successfully updated in S3
+             */
             log.info("Job outcome [SUCCESS]");
             // TODO: Add slack notifications
+            // Text Analytics channel only
         }
         else {
             String outcome = jobExecution.getStatus().toString();
             log.error("Job outcome [" + outcome + "]");
+            log.error("Commit successful [" + success + "]");
             // TODO: Add slack notifications
+            // Text Analytics channel and DECS channel
         }
     }
 }

@@ -23,7 +23,7 @@ public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> 
     private URI endpointURL;
     private S3Client s3Client;
 
-    S3ItemProcessor(String sourceBucket, String targetBucket, String endpointURL){
+    S3ItemProcessor(String sourceBucket, String targetBucket, String endpointURL) throws URISyntaxException {
         /*
         Responsible for copying files between two S3 buckets.
          */
@@ -35,7 +35,7 @@ public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> 
             this.endpointURL = new URI(endpointURL);
         } catch (URISyntaxException e){
             log.error(e.toString());
-            cthrow e;
+            throw e;
         }
 
         EnvironmentVariableCredentialsProvider credentialsProvider = EnvironmentVariableCredentialsProvider.create();

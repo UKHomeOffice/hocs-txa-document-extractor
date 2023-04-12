@@ -15,6 +15,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.digital.ho.hocs.hocstxadocumentextractor.documents.DocumentRow;
 
 import javax.sql.DataSource;
+import java.net.URISyntaxException;
 
 @Configuration
 public class BatchConfiguration {
@@ -30,7 +31,7 @@ public class BatchConfiguration {
     private @Value("${s3.endpoint_url}") String endpointURL;
 
     @Bean
-    public JobStartFinishListener jobListener() {
+    public JobStartFinishListener jobListener() throws URISyntaxException {
         return new JobStartFinishListener(targetBucket, endpointURL, lastIngest);
     }
 
@@ -55,7 +56,7 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public S3ItemProcessor processor() {
+    public S3ItemProcessor processor() throws URISyntaxException {
         return new S3ItemProcessor(sourceBucket, targetBucket, endpointURL);
     }
 

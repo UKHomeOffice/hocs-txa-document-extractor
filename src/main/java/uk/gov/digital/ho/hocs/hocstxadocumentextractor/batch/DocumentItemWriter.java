@@ -16,7 +16,7 @@ public class DocumentItemWriter implements ItemWriter<DocumentRow> {
      */
     private StepExecution stepExecution;
     private static final Logger log = LoggerFactory.getLogger(
-        uk.gov.digital.ho.hocs.hocstxadocumentextractor.batch.DocumentItemProcessor.class);
+        uk.gov.digital.ho.hocs.hocstxadocumentextractor.batch.DocumentItemWriter.class);
 
     @Override
     public void write(Chunk<? extends DocumentRow> doc_list) {
@@ -31,7 +31,7 @@ public class DocumentItemWriter implements ItemWriter<DocumentRow> {
         This is us committing the progress of the job.
         i.e. only after successful flush of all kafka message deliveries
          */
-        log.info("Updating checkpointTimestamp with " + checkpointTimestamp);
+        log.info("Updating checkpointTimestamp in StepContext with " + checkpointTimestamp);
         ExecutionContext stepContext = this.stepExecution.getExecutionContext();
         stepContext.putString("lastSuccessfulCollection", checkpointTimestamp);
     }
