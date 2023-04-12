@@ -29,10 +29,16 @@ public class BatchConfiguration {
     private @Value("${s3.source_bucket}") String sourceBucket;
     private @Value("${s3.target_bucket}") String targetBucket;
     private @Value("${s3.endpoint_url}") String endpointURL;
+    private @Value("${slack.decs_channel}") String decsSlackURL;
+    private @Value("${slack.txa_channel}") String txaSlackURL;
 
     @Bean
     public JobStartFinishListener jobListener() throws URISyntaxException {
-        return new JobStartFinishListener(targetBucket, endpointURL, lastIngest);
+        return new JobStartFinishListener(targetBucket,
+            endpointURL,
+            lastIngest,
+            decsSlackURL,
+            txaSlackURL);
     }
 
     @Bean

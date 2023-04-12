@@ -29,6 +29,10 @@ kafka:
   ingest_topic: ${KAFKA_INGEST_TOPIC:decs-ingest}
   delete_topic: ${KAFKA_DELETE_TOPIC:decs-delete}
 
+slack:
+  decs_channel: ${DECS_SLACK_URL:}
+  txa_channel: ${TXA_SLACK_URL:}
+
 spring-batch-db:
   datasource:
     jdbc-url: jdbc:h2:mem:jobstate
