@@ -41,9 +41,8 @@ public class BatchConfiguration {
         Makes information recorded at the step level available to other elements of the Job.
          */
         ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-
         listener.setKeys(new String[] {"lastSuccessfulCollection", "readCount"});
-
+        listener.setStatuses(new String[] {"*"});  // promote keys regardless of step outcome.
         return listener;
     }
 
@@ -84,7 +83,7 @@ public class BatchConfiguration {
                          PostgresItemReader reader,
                          S3ItemProcessor processor,
                          DocumentItemWriter writer,
-                         NoWorkStepExecutionListener listener,
+                         ReadCountStepExecutionListener listener,
                          ExecutionContextPromotionListener promotionListener) {
         return new StepBuilder("mainStep", jobRepository)
                 .startLimit(1)
@@ -92,7 +91,7 @@ public class BatchConfiguration {
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
-                .listener(promotionListener)  // Must be declared first so its afterStep runs after the NoWorkStepExecutionListener
+                .listener(promotionListener)  // Must be declared first so its afterStep runs after the ReadCountStepExecutionListener
                 .listener(listener)
                 .build();
     }

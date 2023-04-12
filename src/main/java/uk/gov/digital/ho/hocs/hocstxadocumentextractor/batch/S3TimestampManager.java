@@ -37,7 +37,7 @@ public class S3TimestampManager {
 
     S3TimestampManager(String targetBucket,
                        String endpointURL,
-                       String lastIngest){
+                       String lastIngest) throws URISyntaxException {
         log.info("Constructing S3TimestampManager to GET/PUT timestamp metadata from/in: " + targetBucket);
 
         this.targetBucket = targetBucket;
@@ -45,7 +45,7 @@ public class S3TimestampManager {
             this.endpointURL = new URI(endpointURL);
         } catch (URISyntaxException e){
             log.error(e.toString());
-            System.exit(1);
+            throw e;
         }
         this.lastIngest = lastIngest;
 
@@ -59,7 +59,7 @@ public class S3TimestampManager {
         this.s3Client = s3;
     }
 
-    public String getTimestamp() {
+    public String getTimestamp() throws IOException {
         if (this.lastIngest != "") {
             log.info("$METADATA_LAST_INGEST is set => Overriding S3 timestamp with local environment variable");
             log.info("$METADATA_LAST_INGEST=" + this.lastIngest);
@@ -73,14 +73,7 @@ public class S3TimestampManager {
             .bucket(this.targetBucket)
             .build();
         ResponseInputStream fullObject = this.s3Client.getObject(objectRequest);
-//        Map<String, String> metadata = null;
-//        try {
-//            metadata = new ObjectMapper().readValue(fullObject, HashMap.class);
-//        }
-//        catch (IOException e) {
-//            log.error(e.toString());
-//            System.exit(1);
-//        }
+
         Map<String, String> metadata = readJsonBytes(fullObject);
         String result = metadata.get("lastSuccessfulCollection");
         log.info("getTimestamp result is: " + result);
@@ -88,7 +81,7 @@ public class S3TimestampManager {
         return result;
     }
 
-    public boolean putTimestamp(String checkpointTimestamp) {
+    public boolean putTimestamp(String checkpointTimestamp) throws JsonProcessingException {
         log.info("Attempting to PUT the updated metadata.json file...");
         log.info("Got timestamp=" + checkpointTimestamp);
 
@@ -108,26 +101,26 @@ public class S3TimestampManager {
         return false;
     }
 
-    private Map<String, String> readJsonBytes(InputStream inputStream) {
+    private Map<String, String> readJsonBytes(InputStream inputStream) throws IOException {
         Map<String, String> metadata = null;
         try {
             metadata = new ObjectMapper().readValue(inputStream, HashMap.class);
         }
         catch (IOException e) {
             log.error(e.toString());
-            System.exit(1);
+            throw e;
         }
         return metadata;
     }
 
-    private byte[] writeJsonBytes(Map<String, String> inputMap) {
+    private byte[] writeJsonBytes(Map<String, String> inputMap) throws JsonProcessingException {
         byte[] bytes = null;
         try {
             bytes = new ObjectMapper().writeValueAsBytes(inputMap);
         }
         catch (JsonProcessingException e) {
             log.error(e.toString());
-            System.exit(1);
+            throw e;
         }
         return bytes;
     }

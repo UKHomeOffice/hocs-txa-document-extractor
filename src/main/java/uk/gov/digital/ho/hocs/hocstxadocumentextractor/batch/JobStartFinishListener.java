@@ -51,24 +51,26 @@ public class JobStartFinishListener implements JobExecutionListener {
         }
 
         // Notify
+        LocalDateTime startTime = jobExecution.getStartTime();
+        LocalDateTime endTime = jobExecution.getEndTime();
+        long readCount = jobExecution.getExecutionContext().getLong("readCount");
+        log.info("Started=" + startTime);
+        log.info("Finished=" + endTime);
+        log.info("readCount=" + readCount);
+        long noOfMillis = ChronoUnit.MILLIS.between(startTime,endTime);
+        double noOfSeconds = noOfMillis / 1000.0;
+        double docsPerSecond = readCount / noOfSeconds;
+        log.info(String.format("docs/seconds~%.2f", docsPerSecond));
         log.info("Sending job outcome notifications...");
-        // TODO: Add slack notifications
+
         if(jobExecution.getStatus() == BatchStatus.COMPLETED) {
-            LocalDateTime startTime = jobExecution.getStartTime();
-            LocalDateTime endTime = jobExecution.getEndTime();
-            long readCount = jobExecution.getExecutionContext().getLong("readCount");
             log.info("Job outcome [SUCCESS]");
-            log.info("Started=" + startTime);
-            log.info("Finished=" + endTime);
-            log.info("readCount=" + readCount);
-            long noOfMillis = ChronoUnit.MILLIS.between(startTime,endTime);
-            double noOfSeconds = noOfMillis / 1000.0;
-            double docsPerSecond = readCount / noOfSeconds;
-            log.info(String.format("docs/seconds~%.2f", docsPerSecond));
+            // TODO: Add slack notifications
         }
         else {
             String outcome = jobExecution.getStatus().toString();
             log.error("Job outcome [" + outcome + "]");
+            // TODO: Add slack notifications
         }
     }
 }

@@ -9,9 +9,9 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NoWorkStepExecutionListener implements StepExecutionListener {
+public class ReadCountStepExecutionListener implements StepExecutionListener {
 
-    private static final Logger log = LoggerFactory.getLogger(NoWorkStepExecutionListener.class);
+    private static final Logger log = LoggerFactory.getLogger(ReadCountStepExecutionListener.class);
 
     public void beforeStep(StepExecution stepExecution) {
         log.info("Records processed by this step will be counted");

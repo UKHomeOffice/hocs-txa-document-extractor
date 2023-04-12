@@ -35,7 +35,7 @@ public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> 
             this.endpointURL = new URI(endpointURL);
         } catch (URISyntaxException e){
             log.error(e.toString());
-            System.exit(1);
+            cthrow e;
         }
 
         EnvironmentVariableCredentialsProvider credentialsProvider = EnvironmentVariableCredentialsProvider.create();
@@ -72,8 +72,8 @@ public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> 
 
         } catch (S3Exception e) {
             log.error(e.awsErrorDetails().errorMessage());
-            System.exit(1);
+            throw e;
         }
-        return "";
+
     }
 }

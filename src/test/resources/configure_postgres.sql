@@ -14,5 +14,5 @@ INSERT INTO metadata.document_metadata
 VALUES
     ('a1', timestamp '2023-03-22 12:00:00', 'Y', 'decs-file1.pdf'),
     ('b2', timestamp '2023-03-22 13:00:00', 'Y', 'decs-file2.pdf'),
-    ('c3', timestamp '2023-03-22 14:00:00', 'Y', 'decs-file3.pdf'),
+    ('c3', timestamp '2023-03-22 14:00:00', 'Y', 'decs-file3ERROR.pdf'),
     ('d4', timestamp '2023-03-22 15:00:00', 'N', 'decs-file4.pdf');
