@@ -2,6 +2,10 @@
 
 [![CodeQL](https://github.com/UKHomeOffice/hocs-txa-document-extractor/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/UKHomeOffice/hocs-txa-document-extractor/actions/workflows/codeql-analysis.yml)
 
+This application serves as an interface between the DECS system and a Text Analytics pipeline.
+
+The purpose of this application is to identify relevant documents for
+and ingest them for analysis.
 
 ## Versioning
 
