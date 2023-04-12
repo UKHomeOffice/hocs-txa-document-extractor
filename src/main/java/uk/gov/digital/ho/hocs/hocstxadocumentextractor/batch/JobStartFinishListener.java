@@ -62,6 +62,7 @@ public class JobStartFinishListener implements JobExecutionListener {
         }
         if (success) {
             log.info("checkpointTimestamp successfully updated to: " + checkpointTimestamp);
+            jobExecution.getExecutionContext().putString("alreadyCommitted", "true");
         }
         else {
             log.error("committing the checkpointTimestamp failed");

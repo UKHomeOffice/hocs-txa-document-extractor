@@ -62,7 +62,7 @@ public class BatchConfiguration {
 
     @Bean
     public DocumentItemWriter writer() {
-        return new DocumentItemWriter();
+        return new DocumentItemWriter(targetBucket, endpointURL);
     }
 
     @Bean
