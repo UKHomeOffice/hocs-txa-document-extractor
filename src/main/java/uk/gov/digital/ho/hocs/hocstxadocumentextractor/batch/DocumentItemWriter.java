@@ -22,8 +22,7 @@ public class DocumentItemWriter implements ItemWriter<DocumentRow> {
     public void write(Chunk<? extends DocumentRow> doc_list) {
         String checkpointTimestamp = null;
         for (DocumentRow d : doc_list) {
-            log.info("Mock publishing of event for document " + d.getS3_key());
-            log.info("Timestamp of document is " + d.getUploaded_date().toString());
+            log.info("Mock publish of event for doc=" + d.getS3_key() + " with timestamp=" + d.getUploaded_date().toString());
             checkpointTimestamp = d.getUploaded_date().toString();
         }
         /*

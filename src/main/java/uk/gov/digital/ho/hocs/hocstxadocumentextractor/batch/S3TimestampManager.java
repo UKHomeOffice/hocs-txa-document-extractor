@@ -60,12 +60,6 @@ public class S3TimestampManager {
     }
 
     public String getTimestamp() throws IOException {
-        if (this.lastIngest != "") {
-            log.info("$METADATA_LAST_INGEST is set => Overriding S3 timestamp with local environment variable");
-            log.info("$METADATA_LAST_INGEST=" + this.lastIngest);
-            return this.lastIngest;
-        }
-
         log.info("Attempting to GET the metadata.json file...");
         GetObjectRequest objectRequest = GetObjectRequest
             .builder()
@@ -78,6 +72,19 @@ public class S3TimestampManager {
         String result = metadata.get("lastSuccessfulCollection");
         log.info("getTimestamp result is: " + result);
         this.metadataJson = metadata;
+
+        if (this.lastIngest != "") {
+            /*
+            This occurs after loading the metadata.json from S3 even if the env var is set so that
+            the hashmap can be constructed from the real metadata.json file. Only then is the value
+            in the hashmap overwritten with the value from the environment variable.
+             */
+            log.info("$METADATA_LAST_INGEST is set => Overriding S3 timestamp with local environment variable");
+            log.info("$METADATA_LAST_INGEST=" + this.lastIngest);
+            metadata.put("lastSuccessfulCollection", this.lastIngest);
+            return this.lastIngest;
+        }
+
         return result;
     }
 
