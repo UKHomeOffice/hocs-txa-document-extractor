@@ -1,6 +1,6 @@
 package uk.gov.digital.ho.hocs.hocstxadocumentextractor.batch;
 
-import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
@@ -38,7 +38,7 @@ public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> 
             throw e;
         }
 
-        EnvironmentVariableCredentialsProvider credentialsProvider = EnvironmentVariableCredentialsProvider.create();
+        DefaultCredentialsProvider credentialsProvider = DefaultCredentialsProvider.create();
         Region region = Region.EU_WEST_2;
         S3Client s3 = S3Client.builder()
             .region(region)

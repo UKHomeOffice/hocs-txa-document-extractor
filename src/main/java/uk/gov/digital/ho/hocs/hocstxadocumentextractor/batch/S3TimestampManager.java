@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
@@ -49,7 +49,7 @@ public class S3TimestampManager {
         }
         this.lastIngest = lastIngest;
 
-        EnvironmentVariableCredentialsProvider credentialsProvider = EnvironmentVariableCredentialsProvider.create();
+        DefaultCredentialsProvider credentialsProvider = DefaultCredentialsProvider.create();
         Region region = Region.EU_WEST_2;
         S3Client s3 = S3Client.builder()
             .region(region)
