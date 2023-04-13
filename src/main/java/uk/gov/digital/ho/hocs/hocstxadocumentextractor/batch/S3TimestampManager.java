@@ -29,11 +29,11 @@ public class S3TimestampManager {
     private static final Logger log = LoggerFactory.getLogger(
         S3TimestampManager.class);
 
-    private String targetBucket;
-    private URI endpointURL;
-    private String lastIngest;
-    private S3Client s3Client;
-    private Map<String, String> metadataJson;
+    protected String targetBucket;
+    protected URI endpointURL;
+    protected String lastIngest;
+    protected S3Client s3Client;
+    protected Map<String, String> metadataJson;
 
     S3TimestampManager(String targetBucket,
                        String endpointURL,
@@ -108,7 +108,7 @@ public class S3TimestampManager {
         return false;
     }
 
-    private Map<String, String> readJsonBytes(InputStream inputStream) throws IOException {
+    protected Map<String, String> readJsonBytes(InputStream inputStream) throws IOException {
         Map<String, String> metadata = null;
         try {
             metadata = new ObjectMapper().readValue(inputStream, HashMap.class);
@@ -120,7 +120,7 @@ public class S3TimestampManager {
         return metadata;
     }
 
-    private byte[] writeJsonBytes(Map<String, String> inputMap) throws JsonProcessingException {
+    protected byte[] writeJsonBytes(Map<String, String> inputMap) throws JsonProcessingException {
         byte[] bytes = null;
         try {
             bytes = new ObjectMapper().writeValueAsBytes(inputMap);
