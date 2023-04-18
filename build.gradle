@@ -11,27 +11,43 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
+    integrationTestImplementation {
+        extendsFrom testImplementation
+    }
 }
 
 repositories {
     mavenCentral()
 }
 
+sourceSets {
+    integrationTest {
+        java {
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+            srcDir file('src/integration-test/java')
+        }
+        resources.srcDir file('src/integration-test/resources')
+    }
+}
+
 dependencies {
     annotationProcessor 'org.projectlombok:lombok'
-    annotationProcessor 'org.springframework:spring-context-indexer:5.3.23'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.springframework:spring-context-indexer:6.0.6'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:3.0.4'
     compileOnly 'org.projectlombok:lombok'
     implementation platform('software.amazon.awssdk:bom:2.20.43')
     implementation 'software.amazon.awssdk:s3'
-    implementation 'org.springframework.boot:spring-boot-starter-batch'
+    implementation 'org.springframework.boot:spring-boot-starter-batch:3.0.4'
     implementation 'org.postgresql:postgresql:42.5.4'
-    implementation 'org.springframework.boot:spring-boot-starter-json'
+    implementation 'org.springframework.boot:spring-boot-starter-json:3.0.4'
     implementation 'com.slack.api:slack-api-client:1.29.1'
-    runtimeOnly 'com.h2database:h2:2.1.214'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.batch:spring-batch-test'
-    testImplementation 'org.mockito:mockito-inline:2.13.0'
+    implementation 'com.h2database:h2:2.1.214'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.0.4'
+    testImplementation 'org.springframework.batch:spring-batch-test:5.0.0'
+    testImplementation 'org.mockito:mockito-inline:5.2.0'
+    testImplementation 'software.amazon.awssdk:s3-transfer-manager'
+    testImplementation 'software.amazon.awssdk:aws-crt-client'
 }
 
 dependencyManagement {
@@ -47,3 +63,17 @@ jar {
 test {
     useJUnitPlatform()
 }
+
+task integrationTest(type: Test) {
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    outputs.upToDateWhen { false }
+}
+
+integrationTest {
+    useJUnitPlatform()
+}
+
+check.dependsOn integrationTest
+integrationTest.mustRunAfter test
+
