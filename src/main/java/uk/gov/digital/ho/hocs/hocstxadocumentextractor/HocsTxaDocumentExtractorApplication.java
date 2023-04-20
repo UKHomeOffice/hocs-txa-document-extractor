@@ -11,18 +11,5 @@ public class HocsTxaDocumentExtractorApplication {
 
     public static void main(String[] args) {
         ApplicationContext applicationContext = SpringApplication.run(HocsTxaDocumentExtractorApplication.class, args);
-        displayAllBeans(applicationContext);
     }
-
-    public static void displayAllBeans(ApplicationContext applicationContext) {
-        System.out.println("PRINT ALL BEANS ------");
-        String[] allBeanNames = applicationContext.getBeanDefinitionNames();
-        allBeanNames = Stream.of(allBeanNames)
-            .sorted()
-            .toArray(String[]::new);
-        for(String beanName : allBeanNames) {
-            System.out.println(beanName);
-        }
-    }
-
 }
