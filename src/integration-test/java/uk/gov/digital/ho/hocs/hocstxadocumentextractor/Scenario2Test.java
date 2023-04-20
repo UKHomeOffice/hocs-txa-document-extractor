@@ -26,18 +26,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @SpringBatchTest
 @ActiveProfiles("integration")
-public class Scenario1Test {
+public class Scenario2Test {
     /*
-    Integration Test Scenario 1
+    Integration Test Scenario 2
 
-    This scenario is one where 5/6 total documents should be collected and all
-    successfully processed by the batch job.
+    The purpose of this scenario is to simulate a failure during the initial sql query in PostgresItemReader
+    to determine which documents to collect. To force an error here, this scenario does not use TestUtils.setUpPostgres
+    because it intentionally creates a table with incorrect schema to force the sql error.
 
-    The expected outcome is a successfully completed Job with the timestamp updated
-    to that of the latest record in the mock data set.
+    The expected outcome of the Job is failure with the timestamp unchanged.
      */
     private static final Logger log = LoggerFactory.getLogger(
-        uk.gov.digital.ho.hocs.hocstxadocumentextractor.Scenario1Test.class);
+        Scenario2Test.class);
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
     private @Value("${s3.endpoint_url}") String endpointURL;
@@ -51,6 +51,19 @@ public class Scenario1Test {
     @BeforeEach
     void setUp() throws Exception {
         log.info("Test setUp");
+        log.info("Creating schema / table on database with incorrect table definition");
+        this.jdbcTemplate.execute("CREATE SCHEMA metadata;");
+        String createTable = """
+            CREATE TABLE metadata.document_metadata  (
+                document_id varchar(64),
+                uploaded_date timestamp without time zone,
+                WRONG_COLUMN varchar(1),
+                s3_key varchar(1024)
+            );
+            """;
+        this.jdbcTemplate.execute(createTable);
+
+        log.info("Inserting mock data into database");
         String insertRecords = """
             INSERT INTO metadata.document_metadata
             VALUES
@@ -61,7 +74,7 @@ public class Scenario1Test {
                 ('e5', timestamp '2023-03-22 16:00:00', 'Y', 'decs-file5.pdf'),
                 ('f6', timestamp '2023-03-22 17:00:00', 'Y', 'decs-file6.pdf');
             """;
-        TestUtils.setUpPostgres(this.jdbcTemplate, insertRecords);
+        this.jdbcTemplate.execute(insertRecords);
 
         Path path = FileSystems.getDefault().getPath("src", "integration-test","resources","trusted-s3-data");
         TestUtils.setUpS3(path, "trusted-bucket", this.endpointURL);
@@ -81,7 +94,7 @@ public class Scenario1Test {
     public void testJob(@Autowired Job job) throws Exception {
         this.jobLauncherTestUtils.setJob(job);
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
-        assertEquals("COMPLETED", jobExecution.getExitStatus().getExitCode());
-        assertEquals("2023-03-22 17:00:00.0", TestUtils.getTimestampFromS3("untrusted-bucket", this.endpointURL));
+        assertEquals("FAILED", jobExecution.getExitStatus().getExitCode());
+        assertEquals("2023-03-22 11:59:59", TestUtils.getTimestampFromS3("untrusted-bucket", this.endpointURL));
     }
 }
