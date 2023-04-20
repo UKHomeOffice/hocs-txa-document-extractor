@@ -8,8 +8,8 @@ document-metadata:
   ServerName: ${METADATA_SOURCE_HOST:localhost}
   DatabaseName: ${METADATA_SOURCE_DATABASE:postgres}
   PortNumber: ${METADATA_SOURCE_PORT:5432}
-  User: ${METADATA_SOURCE_USER:postgres}
-  Password: ${METADATA_SOURCE_PASSWORD:admin}
+  User: ${METADATA_SOURCE_USER:root}
+  Password: ${METADATA_SOURCE_PASSWORD:dev}
   # Determine
   metadata_schema: ${METADATA_SOURCE_SCHEMA:metadata}
   metadata_table: ${METADATA_SOURCE_TABLE:document_metadata}

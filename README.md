@@ -16,12 +16,13 @@ The unit tests (located in `src/test/`) can be executed through your IDE.
 
 ### Integration Tests
 The application integration tests do require some containerised infrastructure
-to be running:
+to be running.
 1. A postgres database
 2. 2 x S3 buckets
 3. (and soon also) A Kafka cluster
 
-This infrastructure can be spun up with a `docker compose up`.
+This infrastructure can be spun up using the hocs-ci-infrastructure submodule
+with a `docker compose -f ./ci/docker-compose.yml up localstack postgres`.
 
 The integration tests (located in `src/integration-test/`) can then be executed
 through your IDE.
