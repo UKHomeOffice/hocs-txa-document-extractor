@@ -62,7 +62,7 @@ public class TestUtils {
         /*
         Upload files in the specified directory to the specified S3 bucket using the specified endpoint.
          */
-        log.info("Uploading mock documents to S3: " + s3Bucket);
+        log.info("Uploading mock documents to s3://" + s3Bucket);
         DefaultCredentialsProvider credentialsProvider = DefaultCredentialsProvider.create();
         Region region = Region.EU_WEST_2;
         S3AsyncClient s3 = S3AsyncClient.crtBuilder()
@@ -105,7 +105,7 @@ public class TestUtils {
         /*
         Delete all files in the specified S3 bucket using the specified endpointURL
          */
-        log.info("Deleting mock files from S3");
+        log.info("Deleting mock files from s3://" + s3Bucket);
         DefaultCredentialsProvider credentialsProvider = DefaultCredentialsProvider.create();
         Region region = Region.EU_WEST_2;
         S3Client s3 = S3Client.builder()

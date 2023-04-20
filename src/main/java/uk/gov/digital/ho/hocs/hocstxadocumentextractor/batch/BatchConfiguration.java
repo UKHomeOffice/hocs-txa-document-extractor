@@ -16,6 +16,8 @@ import uk.gov.digital.ho.hocs.hocstxadocumentextractor.documents.DocumentRow;
 
 import javax.sql.DataSource;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 public class BatchConfiguration {
@@ -33,12 +35,19 @@ public class BatchConfiguration {
     private @Value("${slack.txa_channel}") String txaSlackURL;
 
     @Bean
-    public JobStartFinishListener jobListener() throws URISyntaxException {
+    public SlackNotification slackNotification() {
+        Map<String, String> slackURLMap = new HashMap<String, String>();
+        slackURLMap.put("txa", txaSlackURL);
+        slackURLMap.put("decs", decsSlackURL);
+        return new SlackNotification(slackURLMap);
+    }
+
+    @Bean
+    public JobStartFinishListener jobListener(SlackNotification slackNotification) throws URISyntaxException {
         return new JobStartFinishListener(targetBucket,
             endpointURL,
             lastIngest,
-            decsSlackURL,
-            txaSlackURL);
+            slackNotification);
     }
 
     @Bean
