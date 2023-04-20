@@ -7,25 +7,32 @@ This application serves as an interface between the DECS system and a Text Analy
 The purpose of this application is to identify relevant documents for
 and ingest them for analysis.
 
-## Run it locally
-To run the application locally:
-1. Clone the project and ensure you have the gradle dependencies available.
-2. Spin up the required infrastructure & test data with a `docker compose build` and `docker compose up`.
-3. Configure the necessary properties either as environment variables or in your IDE run configuration:
-   1. `export AWS_ACCESS_KEY_ID=UNSET`
-   2. `export AWS_SECRET_ACCESS_KEY=UNSET`
-   3. `export METADATA_LAST_INGEST="2023-03-22 11:59:59"`
-4. Compile the project and run the `HocsTxaDocumentExtractorApplication` class.
-5. Observe the outcome of the job in your console
 
 ## Run tests
-### Local tests
-TBC
+### Unit Tests
+The application unit tests do not require any external dependencies.
 
-### Testing via CI pipeline
-TBC
+The unit tests (located in `src/test/`) can be executed through your IDE.
 
-## Deployments
+### Integration Tests
+The application integration tests do require some containerised infrastructure
+to be running:
+1. A postgres database
+2. 2 x S3 buckets
+3. (and soon also) A Kafka cluster
+
+This infrastructure can be spun up with a `docker compose up`.
+
+The integration tests (located in `src/integration-test/`) can then be executed
+through your IDE.
+
+The integration tests each upload some data to the postgres database, upload
+some files to the s3 buckets and then run the Spring Batch job to test what
+happens in different scenarios. All data and files are removed during the tear
+down of each test.
+
+
+## CI & Deployments
 TBC
 
 ## Versioning

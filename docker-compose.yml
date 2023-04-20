@@ -5,9 +5,7 @@ services:
   postgres:
     hostname: postgres
     container_name: postgres
-    build:
-      dockerfile: postgres.Dockerfile
-      context: .
+    image: postgres:14.2
     ports:
       - 5432:5432
     environment:
@@ -38,8 +36,6 @@ services:
     volumes:
       - ${PWD}/ci/localstack/0-install-dependencies.sh:/etc/localstack/init/ready.d/0-install-dependencies.sh
       - ${PWD}/ci/localstack/1-setup-buckets.sh:/etc/localstack/init/ready.d/1-setup-buckets.sh
-      - ${PWD}/src/test/resources/s3_data:/tmp/src/test/resources/s3_data
-      - ${PWD}/src/test/resources/upload_mock_s3_objects.sh:/etc/localstack/init/ready.d/upload_mock_s3_objects.sh
 
 networks:
   hocs-network:
