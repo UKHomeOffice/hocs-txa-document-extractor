@@ -4,7 +4,7 @@
 
 This application serves as an interface between the DECS system and a Text Analytics pipeline.
 
-The purpose of this application is to identify relevant documents for
+The purpose of this application is to identify relevant documents for text analytics
 and ingest them for analysis.
 
 
@@ -19,7 +19,7 @@ The application integration tests do require some containerised infrastructure
 to be running.
 1. A postgres database
 2. 2 x S3 buckets
-3. (and soon also) A Kafka cluster
+3. A Kafka cluster
 
 This infrastructure can be spun up using the hocs-ci-infrastructure submodule
 with a `docker compose -f ./ci/docker-compose.yml up localstack postgres`.
