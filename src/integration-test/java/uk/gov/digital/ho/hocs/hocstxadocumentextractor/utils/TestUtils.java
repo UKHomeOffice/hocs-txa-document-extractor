@@ -1,6 +1,12 @@
 package uk.gov.digital.ho.hocs.hocstxadocumentextractor.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.CreateTopicsResult;
+import org.apache.kafka.clients.admin.DeleteTopicsResult;
+import org.apache.kafka.clients.admin.ListTopicsResult;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.common.KafkaFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -26,9 +32,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class TestUtils {
     /*
@@ -94,6 +102,26 @@ public class TestUtils {
         completedDirectoryUpload.failedTransfers().forEach(failure -> log.error(failure.toString()));
     }
 
+    public static void setUpKafka(AdminClient client, String topicName) throws Exception {
+        /*
+        Create Kafka topic. Check for existence first.
+         */
+        log.info("Checking existing Kafka topics...");
+        ListTopicsResult listTopics = client.listTopics();
+        Set<String> names = listTopics.names().get();
+        boolean exists = names.contains(topicName);
+        if (!exists) {
+            log.info("Creating Kafka topic: " + topicName);
+            NewTopic topic = new NewTopic(topicName, 1, (short)1);
+            CreateTopicsResult result = client.createTopics(Collections.singleton(topic));
+            KafkaFuture<Void> future = result.values().get(topicName);
+            future.get();
+        }
+        else {
+            log.info("Kafka topic already exists: " + topicName);
+        }
+    }
+
     public static void tearDownPostgres(JdbcTemplate jdbcTemplate) {
         /*
         Delete all files in the specified S3 bucket
@@ -143,6 +171,18 @@ public class TestUtils {
             .build();
 
         s3.deleteObjects(multiObjectDeleteRequest);
+    }
+
+    public static void tearDownKafka(AdminClient client, String topicName) throws Exception {
+        /*
+        Delete kafka topic. Close the client.
+         */
+        log.info("Deleting Kafka Topic: " + topicName);
+        DeleteTopicsResult result = client.deleteTopics(Collections.singleton(topicName));
+        KafkaFuture<Void> future = result.values().get(topicName);
+        future.get();
+        log.info("Closing Kafka client");
+        client.close();
     }
 
     public static String getTimestampFromS3(String s3Bucket, String endpointURL) throws Exception {

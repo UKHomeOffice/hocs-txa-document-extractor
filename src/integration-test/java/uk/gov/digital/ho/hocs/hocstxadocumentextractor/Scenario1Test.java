@@ -1,5 +1,7 @@
 package uk.gov.digital.ho.hocs.hocstxadocumentextractor;
 
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,8 @@ import uk.gov.digital.ho.hocs.hocstxadocumentextractor.utils.TestUtils;
 import javax.sql.DataSource;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -42,7 +46,10 @@ public class Scenario1Test {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
     private @Value("${s3.endpoint_url}") String endpointURL;
+    private @Value("${kafka.bootstrap_servers}") String bootstrapServers;
+    private @Value("${kafka.ingest_topic}") String ingestTopic;
     private JdbcTemplate jdbcTemplate;
+    private AdminClient kafkaClient = null;
 
     @Autowired
     public void setDataSource(@Qualifier("metadataSource") DataSource metadataSource) {
@@ -68,6 +75,11 @@ public class Scenario1Test {
         TestUtils.setUpS3(path, "trusted-bucket", this.endpointURL);
         Path otherPath = FileSystems.getDefault().getPath("src", "integration-test","resources","untrusted-s3-data");
         TestUtils.setUpS3(otherPath, "untrusted-bucket", this.endpointURL);
+
+        Map<String, Object> conf = new HashMap<>();
+        conf.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        kafkaClient = AdminClient.create(conf);
+        TestUtils.setUpKafka(kafkaClient, ingestTopic);
     }
 
     @AfterEach
@@ -76,6 +88,7 @@ public class Scenario1Test {
         TestUtils.tearDownPostgres(this.jdbcTemplate);
         TestUtils.tearDownS3("trusted-bucket", this.endpointURL);
         TestUtils.tearDownS3("untrusted-bucket", this.endpointURL);
+        TestUtils.tearDownKafka(kafkaClient, ingestTopic);
     }
 
     @Test
