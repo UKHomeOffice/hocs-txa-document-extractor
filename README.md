@@ -36,6 +36,10 @@ down of each test.
 ## CI & Deployments
 TBC
 
+## Schema Changes
+If the schema of a document (`DocumentRow` class) is going to change in future, please be
+sure to let the text analytics team know so they can prepare for these changes downstream.
+
 ## Versioning
 
 For versioning this project uses SemVer.
