@@ -33,9 +33,9 @@ s3:
 kafka:
   bootstrap_servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
   # Where to post events for documents to ingest
-  ingest_topic: ${KAFKA_INGEST_TOPIC:decs-ingest}
+  ingest_topic: ${KAFKA_INGEST_TOPIC:txa-decs-ingest}
   # Where to post events for documents to delete
-  delete_topic: ${KAFKA_DELETE_TOPIC:decs-delete}
+  delete_topic: ${KAFKA_DELETE_TOPIC:txa-decs-delete}
 
 slack:
   # Webhook URLs for Slack notifications
