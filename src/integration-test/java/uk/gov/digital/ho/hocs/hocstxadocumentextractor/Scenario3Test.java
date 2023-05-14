@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.digital.ho.hocs.hocstxadocumentextractor.batch.DocumentItemWriter;
 import uk.gov.digital.ho.hocs.hocstxadocumentextractor.utils.TestUtils;
 
 import javax.sql.DataSource;
@@ -78,9 +79,10 @@ public class Scenario3Test {
     }
 
     @Test
-    public void testJob(@Autowired Job job) throws Exception {
+    public void testJob(@Autowired Job job, @Autowired DocumentItemWriter writer) throws Exception {
         this.jobLauncherTestUtils.setJob(job);
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
+        writer.commitTimestamp(); // required to trigger the predestroy method during the test
         assertEquals("FAILED", jobExecution.getExitStatus().getExitCode());
         assertEquals("2023-03-22 11:59:59", TestUtils.getTimestampFromS3("untrusted-bucket", this.endpointURL));
     }

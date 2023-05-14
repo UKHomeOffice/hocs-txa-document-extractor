@@ -24,33 +24,37 @@ public class SlackNotification {
         this.slack = Slack.getInstance();
     }
 
-    public String craftSuccessMessage(long readCount, double noOfSeconds, String checkpointTimestamp) {
+    public String craftSuccessMessage(long readCount, double noOfSeconds) {
         String successTemplate = """
             DECS -> TXA Ingest Successful.
-            $readCount documents ingested in $noOfSeconds seconds.
-            Last successful ingest timestamp now $checkpointTimestamp.""";
+            $readCount documents ingested in $noOfSeconds seconds.""";
 
         final String successPayload = successTemplate
             .replace("$readCount", "" + readCount)
-            .replace("$noOfSeconds", "" + noOfSeconds)
-            .replace("$checkpointTimestamp", checkpointTimestamp);
+            .replace("$noOfSeconds", "" + noOfSeconds);
         return successPayload;
     }
 
-    public String craftFailureMessage(String outcome, boolean success, String checkpointTimestamp) {
+    public String craftFailureMessage(String outcome) {
         String failureTemplate = """
             DECS -> TXA Ingest Failed.
-            Outcome was $outcome.
-            Timestamp commit successful - $success ($timestamp).
-            """;
-
-        String timestamp = success ? checkpointTimestamp : "unsuccessful";
+            Outcome was $outcome.""";
 
         final String failurePayload = failureTemplate
-            .replace("$outcome", outcome)
-            .replace("$success", "" + success)
-            .replace("$timestamp", timestamp);
+            .replace("$outcome", outcome);
         return failurePayload;
+    }
+
+    public String craftTimestampMessage(boolean success, String lastCheckpointTimestamp) {
+        String timestampTemplate = """
+            lastSuccessfulTimestamp $timestamp
+            commit successful: $success.
+            """;
+
+        final String timestampPayload = timestampTemplate
+            .replace("$timestamp", lastCheckpointTimestamp)
+            .replace("$success", "" + success); // converts bool to string
+        return timestampPayload;
     }
 
     public String getWebhookURL(String channelSelector) {

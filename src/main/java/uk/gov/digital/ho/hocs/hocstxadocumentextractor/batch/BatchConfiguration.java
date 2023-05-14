@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.digital.ho.hocs.hocstxadocumentextractor.documents.DocumentRow;
 
@@ -77,7 +78,7 @@ public class BatchConfiguration {
 
     @Bean
     public DocumentItemWriter writer() {
-        return new DocumentItemWriter(targetBucket, endpointURL);
+        return new DocumentItemWriter(targetBucket, endpointURL, txaSlackURL, decsSlackURL);
     }
 
     @Bean

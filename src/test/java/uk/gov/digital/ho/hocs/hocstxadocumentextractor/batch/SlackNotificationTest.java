@@ -27,35 +27,49 @@ public class SlackNotificationTest {
 
         long readCount = 5;
         double noOfSeconds = 0.555;
-        String checkpointTimestamp = "2023-03-22 11:59:59.0";
         String expected = """
             DECS -> TXA Ingest Successful.
-            5 documents ingested in 0.555 seconds.
-            Last successful ingest timestamp now 2023-03-22 11:59:59.0.""";
+            5 documents ingested in 0.555 seconds.""";
 
-        String actual = slackNotification.craftSuccessMessage(readCount, noOfSeconds, checkpointTimestamp);
+        String actual = slackNotification.craftSuccessMessage(readCount, noOfSeconds);
         assertEquals(expected, actual);
     }
 
     @Test
     public void craftFailureMessageTest() {
         /*
-        Test a failure message is generated from parameters as expected
+        Test a failure message is generated from parameters as expected.
          */
         Map<String, String> slackURLMap = new HashMap<String, String>();
         slackURLMap.put("txa", "txaSlackURL");
         SlackNotification slackNotification = new SlackNotification(slackURLMap);
 
         String outcome = "FAILED";
-        boolean success = true;
-        String checkpointTimestamp = "2023-03-22 11:59:59.0";
         String expected = """
             DECS -> TXA Ingest Failed.
-            Outcome was FAILED.
-            Timestamp commit successful - true (2023-03-22 11:59:59.0).
+            Outcome was FAILED.""";
+
+        String actual = slackNotification.craftFailureMessage(outcome);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void craftTimestampMessageTest() {
+        /*
+        Test a timestamp message is generated from parameters as expected.
+         */
+        Map<String, String> slackURLMap = new HashMap<String, String>();
+        slackURLMap.put("txa", "txaSlackURL");
+        SlackNotification slackNotification = new SlackNotification(slackURLMap);
+
+        boolean success = true;
+        String timestamp = "2023-03-22 11:59:59.0";
+        String expected = """
+            lastSuccessfulTimestamp 2023-03-22 11:59:59.0
+            commit successful: true.
             """;
 
-        String actual = slackNotification.craftFailureMessage(outcome, success, checkpointTimestamp);
+        String actual = slackNotification.craftTimestampMessage(success, timestamp);
         assertEquals(expected, actual);
     }
 

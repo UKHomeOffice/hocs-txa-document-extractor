@@ -46,32 +46,13 @@ public class JobStartFinishListener implements JobExecutionListener {
     public void afterJob(JobExecution jobExecution) {
         /*
         This afterJob method runs regardless of the success of the job which is what we want.
-        The ItemWriter will only update the StepExecutionContext if events are successfully written out.
-        The StepExecutionContext is promoted to JobExecutionContext.
-        So it is safe to use the timestamp in the JobExecutionContext even if there is some failure in the Step.
-        This afterJob task only gets checkpointTimestamps which have definitely been successfully
-        written out by the ItemWriter.
+
+        The commit of the timestamp occurs in the PreDestroy method of the ItemWriter class instead
+        of here so that we can be sure it is attempted even if the job is interrupted.
+
+        This method is responsible for success and failure notifications.
          */
         log.info("Executing afterJob tasks...");
-        // Put timestamp
-        log.info("Getting last recorded checkpoint from JobExecutionContext");
-        String checkpointTimestamp = jobExecution.getExecutionContext().getString("lastSuccessfulCollection");
-        boolean success;
-        try {
-            success = this.timestampManager.putTimestamp(checkpointTimestamp);
-        } catch (JsonProcessingException e) {
-            log.error("Could not create an updated metadata.json, cannot recover");
-            log.error(e.toString());
-            success = false;
-        }
-        if (success) {
-            log.info("checkpointTimestamp successfully updated to: " + checkpointTimestamp);
-            jobExecution.getExecutionContext().putString("alreadyCommitted", "true");  // to avoid duplication in PreDestroy of the writer
-        }
-        else {
-            log.error("committing the checkpointTimestamp failed");
-            log.error("the next execution of the job will reprocesses uncommitted records");
-        }
 
         // Notify
         LocalDateTime startTime = jobExecution.getStartTime();
@@ -86,21 +67,16 @@ public class JobStartFinishListener implements JobExecutionListener {
         log.info(String.format("docs/seconds~%.2f", docsPerSecond));
         log.info("Sending job outcome notifications...");
 
-        if(jobExecution.getStatus() == BatchStatus.COMPLETED && success) {
-            /*
-            All records successfully read, processed, written
-            AND the timestamp of the latest record successfully updated in S3
-             */
+        if(jobExecution.getStatus() == BatchStatus.COMPLETED) {
             log.info("Job outcome [SUCCESS]");
-            String successMessage = this.slackNotification.craftSuccessMessage(readCount, noOfSeconds, checkpointTimestamp);
+            String successMessage = this.slackNotification.craftSuccessMessage(readCount, noOfSeconds);
             this.slackNotification.publishMessage(successMessage, "txa");
         }
         else {
             String outcome = jobExecution.getStatus().toString();
             log.error("Job outcome [" + outcome + "]");
-            log.error("Timestamp commit successful? [" + success + "]");
 
-            String failureMessage = this.slackNotification.craftFailureMessage(outcome, success, checkpointTimestamp);
+            String failureMessage = this.slackNotification.craftFailureMessage(outcome);
             this.slackNotification.publishMessage(failureMessage, "decs");
             this.slackNotification.publishMessage(failureMessage, "txa");
         }
