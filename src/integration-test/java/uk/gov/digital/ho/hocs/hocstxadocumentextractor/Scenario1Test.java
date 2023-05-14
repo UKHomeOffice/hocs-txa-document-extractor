@@ -23,7 +23,10 @@ import uk.gov.digital.ho.hocs.hocstxadocumentextractor.utils.TestUtils;
 import javax.sql.DataSource;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,10 +39,13 @@ public class Scenario1Test {
     Integration Test Scenario 1
 
     This scenario is one where 5/6 total documents should be collected and all
-    successfully processed by the batch job.
+    successfully processed by the batch job. 1 document is not collected due to it
+    not meeting the criteria set out in the PostgresItemReader query.
 
-    The expected outcome is a successfully completed Job with the timestamp updated
-    to that of the latest record in the mock data set.
+    The expected outcome is:
+    - a successfully completed Job
+    - the timestamp updated to that of the latest record in the mock data set
+    - 5 records published to kafka topic
      */
     private static final Logger log = LoggerFactory.getLogger(
         uk.gov.digital.ho.hocs.hocstxadocumentextractor.Scenario1Test.class);
@@ -96,7 +102,14 @@ public class Scenario1Test {
         this.jobLauncherTestUtils.setJob(job);
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
         writer.commitTimestamp(); // required to trigger the predestroy method during the test
+
+        List<String> expectedDocs = Arrays.asList("a1", "b2", "c3", "e5", "f6");
+
         assertEquals("COMPLETED", jobExecution.getExitStatus().getExitCode());
         assertEquals("2023-03-22 17:00:00.0", TestUtils.getTimestampFromS3("untrusted-bucket", this.endpointURL));
+        List<String> keysConsumed = TestUtils.consumeKafkaMessages(bootstrapServers, ingestTopic, 10);
+        assertEquals(5, keysConsumed.size()); // assert 5 records were written
+        // assert the 5 expected document id's were written (use HashSet to ignore order)
+        assertEquals(new HashSet<String>(expectedDocs), new HashSet<String>(keysConsumed));
     }
 }

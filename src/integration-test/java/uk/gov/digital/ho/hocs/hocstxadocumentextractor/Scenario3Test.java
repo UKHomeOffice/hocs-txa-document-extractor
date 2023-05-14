@@ -1,5 +1,7 @@
 package uk.gov.digital.ho.hocs.hocstxadocumentextractor;
 
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,9 @@ import uk.gov.digital.ho.hocs.hocstxadocumentextractor.utils.TestUtils;
 import javax.sql.DataSource;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -35,14 +40,18 @@ public class Scenario3Test {
     to process. This scenario creates this error by making the s3_key of the second record one
     that does not exist in the S3.
 
-    The expected outcome is a failed Job with the timestamp unchanged
+    The expected outcome is a failed Job with the timestamp unchanged and 0 records published
+    to Kafka.
      */
     private static final Logger log = LoggerFactory.getLogger(
         Scenario3Test.class);
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
     private @Value("${s3.endpoint_url}") String endpointURL;
+    private @Value("${kafka.bootstrap_servers}") String bootstrapServers;
+    private @Value("${kafka.ingest_topic}") String ingestTopic;
     private JdbcTemplate jdbcTemplate;
+    private AdminClient kafkaClient = null;
 
     @Autowired
     public void setDataSource(@Qualifier("metadataSource") DataSource metadataSource) {
@@ -68,6 +77,11 @@ public class Scenario3Test {
         TestUtils.setUpS3(path, "trusted-bucket", this.endpointURL);
         Path otherPath = FileSystems.getDefault().getPath("src", "integration-test","resources","untrusted-s3-data");
         TestUtils.setUpS3(otherPath, "untrusted-bucket", this.endpointURL);
+
+        Map<String, Object> conf = new HashMap<>();
+        conf.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        kafkaClient = AdminClient.create(conf);
+        TestUtils.setUpKafka(kafkaClient, ingestTopic);
     }
 
     @AfterEach
@@ -76,6 +90,7 @@ public class Scenario3Test {
         TestUtils.tearDownPostgres(this.jdbcTemplate);
         TestUtils.tearDownS3("trusted-bucket", this.endpointURL);
         TestUtils.tearDownS3("untrusted-bucket", this.endpointURL);
+        TestUtils.tearDownKafka(kafkaClient, ingestTopic);
     }
 
     @Test
@@ -85,5 +100,8 @@ public class Scenario3Test {
         writer.commitTimestamp(); // required to trigger the predestroy method during the test
         assertEquals("FAILED", jobExecution.getExitStatus().getExitCode());
         assertEquals("2023-03-22 11:59:59", TestUtils.getTimestampFromS3("untrusted-bucket", this.endpointURL));
+
+        List<String> keysConsumed = TestUtils.consumeKafkaMessages(bootstrapServers, ingestTopic, 1);
+        assertEquals(0, keysConsumed.size());
     }
 }

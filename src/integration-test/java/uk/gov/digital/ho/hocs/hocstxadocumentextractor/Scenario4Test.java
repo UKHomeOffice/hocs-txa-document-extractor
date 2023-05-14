@@ -23,7 +23,10 @@ import uk.gov.digital.ho.hocs.hocstxadocumentextractor.utils.TestUtils;
 import javax.sql.DataSource;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,7 +44,7 @@ public class Scenario4Test {
     first chunk that fails.
 
     The expected outcome is a failed Job but with the timestamp updated to the latest timestamp of
-    the last successful chunk within the Job.
+    the last successful chunk within the Job and 4 records written to Kafka.
      */
     private static final Logger log = LoggerFactory.getLogger(
         Scenario4Test.class);
@@ -100,5 +103,11 @@ public class Scenario4Test {
         writer.commitTimestamp(); // required to trigger the predestroy method during the test
         assertEquals("FAILED", jobExecution.getExitStatus().getExitCode());
         assertEquals("2023-03-22 16:00:00.0", TestUtils.getTimestampFromS3("untrusted-bucket", this.endpointURL));
+
+        List<String> expectedDocs = Arrays.asList("a1", "b2", "c3", "e5");
+
+        List<String> keysConsumed = TestUtils.consumeKafkaMessages(bootstrapServers, ingestTopic, 10);
+        assertEquals(4, keysConsumed.size());
+        assertEquals(new HashSet<String>(expectedDocs), new HashSet<String>(keysConsumed));
     }
 }

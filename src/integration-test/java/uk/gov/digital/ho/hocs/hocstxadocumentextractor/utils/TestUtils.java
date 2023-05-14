@@ -6,7 +6,12 @@ import org.apache.kafka.clients.admin.CreateTopicsResult;
 import org.apache.kafka.clients.admin.DeleteTopicsResult;
 import org.apache.kafka.clients.admin.ListTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaFuture;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -37,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 public class TestUtils {
     /*
@@ -217,6 +223,46 @@ public class TestUtils {
         }
         String result = metadata.get("lastSuccessfulCollection");
         return result;
+    }
+
+    public static List<String> consumeKafkaMessages(String bootstrapServers, String topicName, Integer maxNumberOfRecords) {
+        /*
+        Load the requested number of records from kafka to perform assertions on.
+        Return only the keys.
+         */
+        log.info("Creating Kafka consumer to check messages published...");
+        Map<String, Object> conf = new HashMap<>();
+        conf.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        /*
+        Using the same group name repeatedly across tests causes slow re-balancing
+        so generate a random string from uuid to use as the consumer group name.
+         */
+        UUID uuid = UUID.randomUUID();
+        conf.put(ConsumerConfig.GROUP_ID_CONFIG, uuid.toString());
+        conf.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        conf.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        conf.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        /*
+        Since we don't care about the message values for these tests, just use a
+        StringDeserializer instead of creating a proper custom DocumentDeserializer
+         */
+        final Consumer<String, String> consumer = new KafkaConsumer<String, String>(conf);
+        consumer.subscribe(Collections.singletonList(topicName));
+
+        Integer recordCount = 0;
+        Integer attempt = 1;
+        Integer maxAttempts = 3;
+        List<String> keysConsumed = new ArrayList<String>();
+        log.info("Consuming records...");
+        while (recordCount < maxNumberOfRecords && attempt <= maxAttempts) {
+            final ConsumerRecords<String, String> consumerRecords = consumer.poll(1000);
+            recordCount = recordCount + consumerRecords.count();
+            attempt = attempt + 1;
+            consumerRecords.forEach(record -> {
+                keysConsumed.add(record.key());
+            });
+        }
+        return keysConsumed;
     }
 
 }
