@@ -7,7 +7,8 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.kafka.KafkaItemWriter;
+import org.springframework.kafka.core.KafkaTemplate;
 import uk.gov.digital.ho.hocs.hocstxadocumentextractor.documents.DocumentRow;
 
 import java.io.IOException;
@@ -15,38 +16,56 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DocumentItemWriter implements ItemWriter<DocumentRow> {
+public class TxaKafkaItemWriter extends KafkaItemWriter<String, DocumentRow> {
     /*
-    Temporary class to support prototyping without attempting
-    to write to a real output device.
+    Spring Batch ItemWriter class to write DECS documents metadata to Text Analytics
+    Kafka cluster for ingestion.
      */
     private static final Logger log = LoggerFactory.getLogger(
-        uk.gov.digital.ho.hocs.hocstxadocumentextractor.batch.DocumentItemWriter.class);
+        TxaKafkaItemWriter.class);
     private StepExecution stepExecution;
     private String targetBucket;
     private String endpointURL;
     private String txaSlackURL;
     private String decsSlackURL;
+    private KafkaTemplate kafkaTemplate;
 
-    DocumentItemWriter(String targetBucket, String endpointURL, String txaSlackURL, String decsSlackURL) {
+    TxaKafkaItemWriter(String targetBucket, String endpointURL, String txaSlackURL, String decsSlackURL, KafkaTemplate kafkaTemplate) throws Exception {
         this.targetBucket = targetBucket;
         this.endpointURL = endpointURL;
         this.txaSlackURL = txaSlackURL;
         this.decsSlackURL = decsSlackURL;
+        this.kafkaTemplate = kafkaTemplate;
+        setKafkaTemplate(kafkaTemplate);
+        setItemKeyMapper(DocumentRow::getDocument_id);
+        setDelete(false);
+        setTimeout(10000); // Milliseconds to wait for callback
+        afterPropertiesSet();
     }
 
     @Override
-    public void write(Chunk<? extends DocumentRow> doc_list) {
+    public void write(Chunk<? extends DocumentRow> doc_list) throws Exception {
+        if (doc_list == null) {
+            return;
+        }
         String checkpointTimestamp = null;
-        for (DocumentRow d : doc_list) {
-            log.info("Mock publish of event for doc=" + d.getS3_key() + " with timestamp=" + d.getUploaded_date().toString());
-            checkpointTimestamp = d.getUploaded_date().toString();
+        for (DocumentRow doc : doc_list) {
+            log.info("Publishing event for doc=" + doc.getS3_key() + " with timestamp=" + doc.getUploaded_date().toString());
+            String key = itemKeyMapper.convert(doc);
+            writeKeyValue(key, doc);
+
+            checkpointTimestamp = doc.getUploaded_date().toString();
         }
         /*
-        In practice, only update the checkpoint if the write is 100% confirmed successful.
+        Only update the checkpoint timestamp if the write is definitely successful.
         This is us committing the progress of the job.
-        i.e. only after successful flush of all kafka message deliveries
+
+        flush() should throw an exception if there is an error with the delivery of a
+        message. flush() calls flush on the underlying producer before checking all
+        completableFutures to confirm the broker received the messages.
          */
+        flush();
+
         log.info("Updating checkpointTimestamp in StepContext with " + checkpointTimestamp);
         ExecutionContext stepContext = this.stepExecution.getExecutionContext();
         stepContext.putString("lastSuccessfulCollection", checkpointTimestamp);

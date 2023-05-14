@@ -77,29 +77,16 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public DocumentItemWriter writer() {
-        return new DocumentItemWriter(targetBucket, endpointURL, txaSlackURL, decsSlackURL);
+    public TxaKafkaItemWriter writer(KafkaTemplate kafkaTemplate) throws Exception {
+        return new TxaKafkaItemWriter(targetBucket, endpointURL, txaSlackURL, decsSlackURL, kafkaTemplate);
     }
-
-    @Bean
-    public Job documentExtractionJob(JobRepository jobRepository,
-                             JobStartFinishListener listener,
-                             Step mainStep) {
-        return new JobBuilder("documentExtractionJob", jobRepository)
-                .incrementer(new RunIdIncrementer())
-                .listener(listener)
-                .flow(mainStep)
-                .end()
-                .build();
-    }
-
 
     @Bean
     public Step mainStep(JobRepository jobRepository,
                          PlatformTransactionManager transactionManager,
                          PostgresItemReader reader,
                          S3ItemProcessor processor,
-                         DocumentItemWriter writer,
+                         TxaKafkaItemWriter writer,
                          ReadCountStepExecutionListener listener,
                          ExecutionContextPromotionListener promotionListener) {
         return new StepBuilder("mainStep", jobRepository)
@@ -111,6 +98,18 @@ public class BatchConfiguration {
                 .listener(promotionListener)  // Must be declared first so its afterStep runs after the ReadCountStepExecutionListener
                 .listener(listener)
                 .build();
+    }
+
+    @Bean
+    public Job documentExtractionJob(JobRepository jobRepository,
+                                     JobStartFinishListener listener,
+                                     Step mainStep) {
+        return new JobBuilder("documentExtractionJob", jobRepository)
+            .incrementer(new RunIdIncrementer())
+            .listener(listener)
+            .flow(mainStep)
+            .end()
+            .build();
     }
 
 }

@@ -43,6 +43,7 @@ public class TestUtils {
         Execute the specified INSERT INTO query using the specified JdbcTemplate
          */
         log.info("Creating schema / table on database");
+        jdbcTemplate.execute("DROP SCHEMA IF EXISTS metadata CASCADE;");
         jdbcTemplate.execute("CREATE SCHEMA metadata;");
         String createTable = """
             CREATE TABLE metadata.document_metadata  (
