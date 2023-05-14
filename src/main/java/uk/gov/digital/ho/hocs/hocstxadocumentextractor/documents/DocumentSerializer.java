@@ -16,6 +16,10 @@ public class DocumentSerializer implements Serializer<DocumentRow> {
 
     @Override
     public byte[] serialize(String topic, DocumentRow document) {
+        /*
+        Although the topic argument is not used, it is required by the Kafka
+        classes which we pass this DocumentSerializer to.
+         */
         try {
             if (document == null){
                 log.warn("Null data received by DocumentSerializer");
