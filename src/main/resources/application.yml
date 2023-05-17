@@ -43,8 +43,8 @@ kafka:
 
 slack:
   # Webhook URLs for Slack notifications
-  decs_channel: ${DECS_SLACK_URL:}
-  txa_channel: ${TXA_SLACK_URL:}
+  decs_channel: ${SLACK_DECS_URL:}
+  txa_channel: ${SLACK_TXA_URL:}
 
 spring-batch-db:
   # Configure the in-memory database which serves as the Spring Batch JobRepository

@@ -1,0 +1,37 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: hocs-txa-document-delete
+spec:
+  schedule: "11 20 * * *"
+  jobTemplate:
+    spec:
+      completions: 1
+      parallelism: 1
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            name: hocs-txa-document-extractor
+        spec:
+          restartPolicy: Never
+          securityContext:
+            runAsUser: 10000
+            runAsNonRoot: true
+          containers:
+            - name: spring-batch-job
+              image: quay.io/ukhomeofficedigital/hocs-txa-document-extractor
+              imagePullPolicy: Always
+              resources:
+                limits:
+                  memory: "2G"
+                  cpu: "2"
+                requests:
+                  memory: "1G"
+                  cpu: "1"
+              envFrom:
+                - secretRef:
+                    name: txa-hocs-extractor-settings
+              env:
+                - name: MODE_DELETE
+                  value: "true"
