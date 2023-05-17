@@ -61,10 +61,19 @@ public class TestUtils {
         jdbcTemplate.execute("CREATE SCHEMA metadata;");
         String createTable = """
             CREATE TABLE metadata.document_metadata  (
-                document_id varchar(64),
-                uploaded_date timestamp without time zone,
-                relevant_document varchar(1),
-                s3_key varchar(1024)
+                id bigint,
+                uuid uuid,
+                external_reference_uuid uuid,
+                type text,
+                display_name text,
+                file_link text,
+                pdf_link text,
+                status text,
+                created_on timestamp without time zone,
+                updated_on timestamp without time zone,
+                deleted boolean,
+                upload_owner uuid,
+                deleted_on timestamp without time zone
             );
             """;
         jdbcTemplate.execute(createTable);

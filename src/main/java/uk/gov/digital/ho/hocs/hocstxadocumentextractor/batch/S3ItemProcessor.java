@@ -50,10 +50,10 @@ public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> 
 
     @Override
     public DocumentRow process(final DocumentRow doc) throws S3Exception {
-        final String s3_key = doc.getS3_key();
-        log.info("Copying document: " + s3_key);
+        final String pdfLink = doc.getPdfLink();
+        log.info("Copying document: " + pdfLink);
 
-        copyBucketObject(this.s3Client, this.sourceBucket, s3_key, this.targetBucket);
+        copyBucketObject(this.s3Client, this.sourceBucket, pdfLink, this.targetBucket);
         return doc;
     }
 

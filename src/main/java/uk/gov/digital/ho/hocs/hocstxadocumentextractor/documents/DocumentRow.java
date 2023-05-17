@@ -10,12 +10,13 @@ public class DocumentRow {
     /*
     A custom data structure to contain the information
     related to a single DECS document
-
-    TODO: Add extra fields here once the metadata structure is known.
      */
-    private String document_id;
-    private Timestamp uploaded_date;
-    private String relevant_document;
-    private String s3_key;
-
+    private String uuid;
+    private String externalReferenceUuid;
+    private String caseType;
+    private String type;
+    private String pdfLink;
+    private String status;
+    private Timestamp updatedOn;
+    private Timestamp deletedOn;
 }

@@ -24,11 +24,11 @@ public class TxaKafkaItemWriter extends KafkaItemWriter<String, DocumentRow> {
     private static final Logger log = LoggerFactory.getLogger(
         TxaKafkaItemWriter.class);
     private StepExecution stepExecution;
-    private String targetBucket;
-    private String endpointURL;
-    private String txaSlackURL;
-    private String decsSlackURL;
-    private KafkaTemplate kafkaTemplate;
+    private final String targetBucket;
+    private final String endpointURL;
+    private final String txaSlackURL;
+    private final String decsSlackURL;
+    private final KafkaTemplate kafkaTemplate;
 
     TxaKafkaItemWriter(String targetBucket, String endpointURL, String txaSlackURL, String decsSlackURL, KafkaTemplate kafkaTemplate) throws Exception {
         this.targetBucket = targetBucket;
@@ -37,7 +37,7 @@ public class TxaKafkaItemWriter extends KafkaItemWriter<String, DocumentRow> {
         this.decsSlackURL = decsSlackURL;
         this.kafkaTemplate = kafkaTemplate;
         setKafkaTemplate(kafkaTemplate);
-        setItemKeyMapper(DocumentRow::getDocument_id);
+        setItemKeyMapper(DocumentRow::getUuid);
         setDelete(false);
         setTimeout(10000); // Milliseconds to wait for callback
         afterPropertiesSet();
@@ -50,11 +50,11 @@ public class TxaKafkaItemWriter extends KafkaItemWriter<String, DocumentRow> {
         }
         String checkpointTimestamp = null;
         for (DocumentRow doc : doc_list) {
-            log.info("Publishing event for doc=" + doc.getS3_key() + " with timestamp=" + doc.getUploaded_date().toString());
+            log.info("Publishing event for doc=" + doc.getUuid() + " with timestamp=" + doc.getUpdatedOn().toString());
             String key = itemKeyMapper.convert(doc);
             writeKeyValue(key, doc);
 
-            checkpointTimestamp = doc.getUploaded_date().toString();
+            checkpointTimestamp = doc.getUpdatedOn().toString();
         }
         /*
         Only update the checkpoint timestamp if the write is definitely successful.

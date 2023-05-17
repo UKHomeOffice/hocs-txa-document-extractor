@@ -29,15 +29,22 @@ public class DocumentSerializerTest {
     void exampleSerializationTest() throws Exception {
         // given a document
         DocumentRow doc = new DocumentRow();
-        String documentID = "id1";
-        Timestamp timestamp = Timestamp.valueOf("2007-09-23 10:10:10.0");
-        String relevantDocument = "Y";
-        String s3Key = "s3://some-bucket/some-file.pdf";
-        doc.setDocument_id(documentID);
-        doc.setUploaded_date(timestamp);
-        doc.setRelevant_document(relevantDocument);
-        doc.setS3_key(s3Key);
-
+        String uuid = "00000000-aaaa-bbbb-cccc-000000000000";
+        String externalReferenceUuid = "00000000-aaaa-bbbb-cccc-0000000000a1";
+        String caseType = "a1";
+        String type = "ORIGINAL";
+        String pdfLink = "some-file.pdf";
+        String status = "UPLOADED";
+        Timestamp updatedOn = Timestamp.valueOf("2007-09-23 10:10:10.0");
+        Timestamp deletedOn = Timestamp.valueOf("2008-09-23 10:10:10.0");
+        doc.setUuid(uuid);
+        doc.setExternalReferenceUuid(externalReferenceUuid);
+        doc.setCaseType(caseType);
+        doc.setType(type);
+        doc.setPdfLink(pdfLink);
+        doc.setStatus(status);
+        doc.setUpdatedOn(updatedOn);
+        doc.setDeletedOn(deletedOn);
 
         // serialize it
         DocumentSerializer serializer = new DocumentSerializer();
@@ -51,10 +58,15 @@ public class DocumentSerializerTest {
         catch (IOException e) {
             throw e;
         }
-        long epochTime = 1190538610000L;
-        assertEquals(document.get("uploaded_date"), epochTime);
-        assertEquals(document.get("relevant_document"), "Y");
-        assertEquals(document.get("s3_key"), "s3://some-bucket/some-file.pdf");
-        assertEquals(document.get("document_id"), "id1");
+        long updatedOnEpoch = 1190538610000L;
+        long deletedOnEpoch = 1222161010000L;
+        assertEquals(document.get("uuid"), uuid);
+        assertEquals(document.get("externalReferenceUuid"), externalReferenceUuid);
+        assertEquals(document.get("caseType"), caseType);
+        assertEquals(document.get("type"), type);
+        assertEquals(document.get("pdfLink"), pdfLink);
+        assertEquals(document.get("status"), status);
+        assertEquals(document.get("updatedOn"), updatedOnEpoch);
+        assertEquals(document.get("deletedOn"), deletedOnEpoch);
     }
 }

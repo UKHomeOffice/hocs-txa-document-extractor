@@ -23,26 +23,37 @@ public class DocumentRowMapperTest {
     void rowMapTest() throws SQLException {
         // given a RowMapper
         DocumentRowMapper docMap = new DocumentRowMapper();
-        // Some values for a DocumentRow
-        String documentID = "id1";
-        Timestamp timestamp = Timestamp.valueOf("2007-09-23 10:10:10.0");
-        String relevantDocument = "Y";
-        String s3Key = "s3://some-bucket/some-file.pdf";
+        // And some values for a DocumentRow
+        String uuid = "00000000-aaaa-bbbb-cccc-000000000000";
+        String externalReferenceUuid = "00000000-aaaa-bbbb-cccc-0000000000a1";
+        String caseType = "a1";
+        String type = "ORIGINAL";
+        String pdfLink = "some-file.pdf";
+        String status = "UPLOADED";
+        Timestamp updatedOn = Timestamp.valueOf("2007-09-23 10:10:10.0");
+        Timestamp deletedOn = Timestamp.valueOf("2008-09-23 10:10:10.0");
         // And a ResultSet
-        when(resultSet.getString("document_id")).thenReturn(documentID);
-        when(resultSet.getTimestamp("uploaded_date")).thenReturn(timestamp);
-        when(resultSet.getString("relevant_document")).thenReturn(relevantDocument);
-        when(resultSet.getString("s3_key")).thenReturn(s3Key);
-
+        when(resultSet.getString("uuid")).thenReturn(uuid);
+        when(resultSet.getString("external_reference_uuid")).thenReturn(externalReferenceUuid);
+        when(resultSet.getString("case_type")).thenReturn(caseType);
+        when(resultSet.getString("type")).thenReturn(type);
+        when(resultSet.getString("pdf_link")).thenReturn(pdfLink);
+        when(resultSet.getString("status")).thenReturn(status);
+        when(resultSet.getTimestamp("updated_on")).thenReturn(updatedOn);
+        when(resultSet.getTimestamp("deleted_on")).thenReturn(deletedOn);
 
         // when the mapper is called on the resultset
         DocumentRow doc = docMap.mapRow(resultSet, 1);
 
         // then it returns a DocumentRow object
-        assertEquals(doc.getDocument_id(), documentID);
-        assertEquals(doc.getUploaded_date(), timestamp);
-        assertEquals(doc.getRelevant_document(), relevantDocument);
-        assertEquals(doc.getS3_key(), s3Key);
+        assertEquals(doc.getUuid(), uuid);
+        assertEquals(doc.getExternalReferenceUuid(), externalReferenceUuid);
+        assertEquals(doc.getCaseType(), caseType);
+        assertEquals(doc.getType(), type);
+        assertEquals(doc.getPdfLink(), pdfLink);
+        assertEquals(doc.getStatus(), status);
+        assertEquals(doc.getUpdatedOn(), updatedOn);
+        assertEquals(doc.getDeletedOn(), deletedOn);
     }
 
 }

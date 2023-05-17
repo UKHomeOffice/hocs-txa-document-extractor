@@ -36,17 +36,50 @@ public class PostgresItemReader extends JdbcCursorItemReader<DocumentRow> {
         this.fetchSize = fetchSize;
 
         String document_query = """
+            WITH all_case_document_types AS (
+                SELECT
+                    uuid::text,
+                    external_reference_uuid::text,
+                    RIGHT(external_reference_uuid::text, 2) as case_type,
+                    type,
+                    pdf_link,
+                    status,
+                    updated_on,
+                    deleted_on
+                FROM
+                    $schema.$table
+                WHERE
+                    status in ('UPLOADED')
+                    AND pdf_link is NOT NULL
+                    AND updated_on > '$timestamp'::timestamp
+            )
             SELECT
-                document_id,
-                uploaded_date,
-                relevant_document,
-                s3_key
+                uuid,
+                external_reference_uuid,
+                case_type,
+                type,
+                pdf_link,
+                status,
+                updated_on,
+                deleted_on
             FROM
-                $schema.$table
+                all_case_document_types
             WHERE
-                relevant_document = 'Y'
-                AND uploaded_date > '$timestamp'::timestamp
-            ORDER BY uploaded_date ASC;
+                (case_type = 'a1' AND type in ('ORIGINAL', 'CONTRIBUTION'))
+                OR (case_type = 'a2' AND type in ('ORIGINAL', 'CONTRIBUTION'))
+                OR (case_type = 'a3' AND type in ('ORIGINAL', 'CONTRIBUTION'))
+                OR (case_type = 'a4' AND type in ('Original Complaint', 'Contribution Response'))
+                OR (case_type = 'a5' AND type in ('Original Complaint', 'Contribution Response'))
+                OR (case_type = 'b5' AND type in ('Original correspondence', 'Further correspondence from MPs Office', 'Contributions received'))
+                OR (case_type = 'b6' AND type in ('Original correspondence', 'Further correspondence from MPs Office', 'Contributions received'))
+                OR (case_type = 'c1' AND type in ('Claim form', 'Supporting evidence'))
+                OR (case_type = 'c5' AND type in ('To document', 'Public correspondence', 'Complaint leaflet', 'Complaint letter', 'Email', 'CRF', 'Appeal Leaflet', 'IMB Letter'))
+                OR (case_type = 'c6' AND type in ('To document', 'Public correspondence', 'Complaint leaflet', 'Complaint letter', 'Email', 'CRF', 'Appeal Leaflet', 'IMB Letter'))
+                OR (case_type = 'c7' AND type in ('Original complaint'))
+                OR (case_type = 'c9' AND type in ('To document', 'Public correspondence', 'Complaint leaflet', 'Complaint letter', 'Email', 'CRF'))
+                OR (case_type = 'd1' AND type in ('Initial Correspondence', 'Contribution Response'))
+                OR (case_type = 'e1' AND type in ('To document', 'Public correspondence', 'Complaint leaflet', 'Complaint letter', 'Email', 'CRF'))
+            ORDER BY updated_on ASC;
             """;
 
         setDataSource(this.dataSource);

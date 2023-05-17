@@ -16,20 +16,33 @@ public class DocumentRowTest {
         DocumentRow doc = new DocumentRow();
 
         // when values are set
-        String documentID = "id1";
-        Timestamp timestamp = Timestamp.valueOf("2007-09-23 10:10:10.0");
-        String relevantDocument = "Y";
-        String s3Key = "s3://some-bucket/some-file.pdf";
-        doc.setDocument_id(documentID);
-        doc.setUploaded_date(timestamp);
-        doc.setRelevant_document(relevantDocument);
-        doc.setS3_key(s3Key);
+        String uuid = "00000000-aaaa-bbbb-cccc-000000000000";
+        String externalReferenceUuid = "00000000-aaaa-bbbb-cccc-0000000000a1";
+        String caseType = "a1";
+        String type = "ORIGINAL";
+        String pdfLink = "some-file.pdf";
+        String status = "UPLOADED";
+        Timestamp updatedOn = Timestamp.valueOf("2007-09-23 10:10:10.0");
+        Timestamp deletedOn = Timestamp.valueOf("2008-09-23 10:10:10.0");
+
+        doc.setUuid(uuid);
+        doc.setExternalReferenceUuid(externalReferenceUuid);
+        doc.setCaseType(caseType);
+        doc.setType(type);
+        doc.setPdfLink(pdfLink);
+        doc.setStatus(status);
+        doc.setUpdatedOn(updatedOn);
+        doc.setDeletedOn(deletedOn);
 
         // then they are set correctly
-        assertEquals(doc.getDocument_id(), documentID);
-        assertEquals(doc.getUploaded_date(), timestamp);
-        assertEquals(doc.getRelevant_document(), relevantDocument);
-        assertEquals(doc.getS3_key(), s3Key);
+        assertEquals(doc.getUuid(), uuid);
+        assertEquals(doc.getExternalReferenceUuid(), externalReferenceUuid);
+        assertEquals(doc.getCaseType(), caseType);
+        assertEquals(doc.getType(), type);
+        assertEquals(doc.getPdfLink(), pdfLink);
+        assertEquals(doc.getStatus(), status);
+        assertEquals(doc.getUpdatedOn(), updatedOn);
+        assertEquals(doc.getDeletedOn(), deletedOn);
     }
 
     @Test
@@ -38,25 +51,42 @@ public class DocumentRowTest {
         DocumentRow doc = new DocumentRow();
 
         // when values are set
-        String documentID = "id1";
-        Timestamp timestamp = Timestamp.valueOf("2007-09-23 10:10:10.0");
-        String relevant_document = "Y";
-        String s3_key = "s3://some-bucket/some-file.pdf";
-        doc.setDocument_id(documentID);
-        doc.setUploaded_date(timestamp);
-        doc.setRelevant_document(relevant_document);
-        doc.setS3_key(s3_key);
-        // and then gotten
-        String actualDocumentID = doc.getDocument_id();
-        Timestamp actualTimestamp = doc.getUploaded_date();
-        String actualRelevantDocument = doc.getRelevant_document();
-        String actualS3Key = doc.getS3_key();
+        String uuid = "00000000-aaaa-bbbb-cccc-000000000000";
+        String externalReferenceUuid = "00000000-aaaa-bbbb-cccc-0000000000a1";
+        String caseType = "a1";
+        String type = "ORIGINAL";
+        String pdfLink = "some-file.pdf";
+        String status = "UPLOADED";
+        Timestamp updatedOn = Timestamp.valueOf("2007-09-23 10:10:10.0");
+        Timestamp deletedOn = Timestamp.valueOf("2008-09-23 10:10:10.0");
 
+        doc.setUuid(uuid);
+        doc.setExternalReferenceUuid(externalReferenceUuid);
+        doc.setCaseType(caseType);
+        doc.setType(type);
+        doc.setPdfLink(pdfLink);
+        doc.setStatus(status);
+        doc.setUpdatedOn(updatedOn);
+        doc.setDeletedOn(deletedOn);
+
+        // and then gotten
+        String actualUuid = doc.getUuid();
+        String actualExternalReferenceUuid = doc.getExternalReferenceUuid();
+        String actualCaseType = doc.getCaseType();
+        String actualType = doc.getType();
+        String actualPdfLink = doc.getPdfLink();
+        String actualStatus = doc.getStatus();
+        Timestamp actualUpdatedOn = doc.getUpdatedOn();
+        Timestamp actualDeletedOn = doc.getDeletedOn();
 
         // then they are as expected
-        assertEquals(actualDocumentID, documentID);
-        assertEquals(actualTimestamp, timestamp);
-        assertEquals(actualRelevantDocument, relevant_document);
-        assertEquals(actualS3Key, s3_key);
+        assertEquals(actualUuid, uuid);
+        assertEquals(actualExternalReferenceUuid, externalReferenceUuid);
+        assertEquals(actualCaseType, caseType);
+        assertEquals(actualType, type);
+        assertEquals(actualPdfLink, pdfLink);
+        assertEquals(actualStatus, status);
+        assertEquals(actualUpdatedOn, updatedOn);
+        assertEquals(actualDeletedOn, deletedOn);
     }
 }

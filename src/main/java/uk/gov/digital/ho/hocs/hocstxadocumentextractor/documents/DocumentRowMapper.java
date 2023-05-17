@@ -11,10 +11,14 @@ public class DocumentRowMapper implements RowMapper<DocumentRow>{
      */
     public DocumentRow mapRow(ResultSet rs, int rowNum) throws SQLException {
         DocumentRow document = new DocumentRow();
-        document.setDocument_id(rs.getString("document_id"));
-        document.setUploaded_date(rs.getTimestamp("uploaded_date"));
-        document.setRelevant_document(rs.getString("relevant_document"));
-        document.setS3_key(rs.getString("s3_key"));
+        document.setUuid(rs.getString("uuid"));
+        document.setExternalReferenceUuid(rs.getString("external_reference_uuid"));
+        document.setCaseType(rs.getString("case_type"));
+        document.setType(rs.getString("type"));
+        document.setPdfLink(rs.getString("pdf_link"));
+        document.setStatus(rs.getString("status"));
+        document.setUpdatedOn(rs.getTimestamp("updated_on"));
+        document.setDeletedOn(rs.getTimestamp("deleted_on"));
         return document;
     }
 }
