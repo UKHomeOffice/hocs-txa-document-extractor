@@ -16,6 +16,7 @@ public class JobStartFinishListener implements JobExecutionListener {
     private static final Logger log = LoggerFactory.getLogger(JobStartFinishListener.class);
     private S3TimestampManager timestampManager;
     private final SlackNotification slackNotification;
+    private boolean deletes;
 
     JobStartFinishListener(String targetBucket,
                            String endpointURL,
@@ -25,11 +26,14 @@ public class JobStartFinishListener implements JobExecutionListener {
                            SlackNotification slackNotification) throws URISyntaxException {
         this.timestampManager = new S3TimestampManager(targetBucket, endpointURL, lastIngest, lastDelete, deletes);
         this.slackNotification = slackNotification;
+        this.deletes = deletes;
     }
 
     @Override
     public void beforeJob(JobExecution jobExecution) {
         // Get timestamp
+        String mode = this.deletes ? "DELETE" : "INGEST";
+        log.info(String.format("Application is running in %s mode.", mode));
         log.info("Executing beforeJob tasks...");
         String lastSuccessfulCollection = null;
         try {

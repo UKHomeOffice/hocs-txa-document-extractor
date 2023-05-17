@@ -23,9 +23,7 @@ import uk.gov.digital.ho.hocs.hocstxadocumentextractor.utils.TestUtils;
 import javax.sql.DataSource;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -34,21 +32,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @SpringBatchTest
 @ActiveProfiles("integration")
-public class Scenario1Test {
+public class IngestScenario2Test {
     /*
-    Integration Test Scenario 1
+    Integration Test Ingest Scenario 2
 
-    This scenario is one where 5/6 total documents should be collected and all
-    successfully processed by the batch job. 1 document is not collected due to it
-    not meeting the criteria set out in the PostgresItemReader query.
+    The purpose of this scenario is to simulate a failure during the initial sql query in PostgresItemReader
+    to determine which documents to collect. To force an error here, this scenario does not use TestUtils.setUpPostgres
+    because it intentionally creates a table with incorrect schema to force the sql error.
 
-    The expected outcome is:
-    - a successfully completed Job
-    - the timestamp updated to that of the latest record in the mock data set
-    - 5 records published to kafka topic
+    The expected outcome of the Job is failure with the timestamp unchanged and 0 records
+    published to Kafka.
      */
     private static final Logger log = LoggerFactory.getLogger(
-        uk.gov.digital.ho.hocs.hocstxadocumentextractor.Scenario1Test.class);
+        IngestScenario2Test.class);
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
     private @Value("${mode.delete}") boolean deletes;
@@ -66,8 +62,30 @@ public class Scenario1Test {
     @BeforeEach
     void setUp() throws Exception {
         log.info("Test setUp");
+        log.info("Creating schema / table on database with incorrect table definition");
+        this.jdbcTemplate.execute("CREATE SCHEMA metadata;");
+        String createTable = """
+            CREATE TABLE metadata.document_metadata  (
+                id bigint,
+                WRONG_COLUMN uuid,
+                external_reference_uuid uuid,
+                type text,
+                display_name text,
+                file_link text,
+                pdf_link text,
+                status text,
+                created_on timestamp without time zone,
+                updated_on timestamp without time zone,
+                deleted boolean,
+                upload_owner uuid,
+                deleted_on timestamp without time zone
+            );
+            """;
+        this.jdbcTemplate.execute(createTable);
+
+        log.info("Inserting mock data into database");
         String insertRecords = """
-            INSERT INTO metadata.document_metadata (uuid, external_reference_uuid, type, pdf_link, status, updated_on, deleted_on)
+            INSERT INTO metadata.document_metadata (WRONG_COLUMN, external_reference_uuid, type, pdf_link, status, updated_on, deleted_on)
             VALUES
                 ('00000000-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', NULL),
                 ('00000001-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file2.pdf', 'UPLOADED', timestamp '2023-03-22 13:00:00', NULL),
@@ -76,7 +94,7 @@ public class Scenario1Test {
                 ('00000004-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file5.pdf', 'UPLOADED', timestamp '2023-03-22 16:00:00', NULL),
                 ('00000005-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file6.pdf', 'UPLOADED', timestamp '2023-03-22 17:00:00', NULL);
             """;
-        TestUtils.setUpPostgres(this.jdbcTemplate, insertRecords);
+        this.jdbcTemplate.execute(insertRecords);
 
         Path path = FileSystems.getDefault().getPath("src", "integration-test","resources","trusted-s3-data");
         TestUtils.setUpS3(path, "trusted-bucket", this.endpointURL);
@@ -103,18 +121,10 @@ public class Scenario1Test {
         this.jobLauncherTestUtils.setJob(job);
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
         writer.commitTimestamp(); // required to trigger the predestroy method during the test
+        assertEquals("FAILED", jobExecution.getExitStatus().getExitCode());
+        assertEquals("2023-03-22 11:59:59", TestUtils.getTimestampFromS3("untrusted-bucket", this.endpointURL, this.deletes));
 
-        List<String> expectedDocs = Arrays.asList("00000000-aaaa-bbbb-cccc-000000000000",
-                                                  "00000001-aaaa-bbbb-cccc-000000000000",
-                                                  "00000002-aaaa-bbbb-cccc-000000000000",
-                                                  "00000004-aaaa-bbbb-cccc-000000000000",
-                                                  "00000005-aaaa-bbbb-cccc-000000000000");
-
-        assertEquals("COMPLETED", jobExecution.getExitStatus().getExitCode());
-        assertEquals("2023-03-22 17:00:00.0", TestUtils.getTimestampFromS3("untrusted-bucket", this.endpointURL, this.deletes));
-        List<String> keysConsumed = TestUtils.consumeKafkaMessages(bootstrapServers, ingestTopic, 10);
-        assertEquals(5, keysConsumed.size()); // assert 5 records were written
-        // assert the 5 expected document id's were written (use HashSet to ignore order)
-        assertEquals(new HashSet<String>(expectedDocs), new HashSet<String>(keysConsumed));
+        List<String> keysConsumed = TestUtils.consumeKafkaMessages(bootstrapServers, ingestTopic, 1);
+        assertEquals(0, keysConsumed.size());
     }
 }

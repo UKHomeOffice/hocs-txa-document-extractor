@@ -34,20 +34,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @SpringBatchTest
 @ActiveProfiles("integration")
-public class Scenario4Test {
+public class IngestScenario1Test {
     /*
-    Integration Test Scenario 4
+    Integration Test Ingest Scenario 1
 
-    This scenario simulates the case where there is an error during the last chunk of documents
-    to process. This scenario creates this error by making the s3_key of the last record one
-    that does not exist in the S3. This scenario is one example of the case where it is not the
-    first chunk that fails.
+    This scenario is one where 5/6 total documents should be collected and all
+    successfully processed by the batch job. 1 document is not collected due to it
+    not meeting the criteria set out in the PostgresItemReader query.
 
-    The expected outcome is a failed Job but with the timestamp updated to the latest timestamp of
-    the last successful chunk within the Job and 4 records written to Kafka.
+    The expected outcome is:
+    - a successfully completed Job
+    - the timestamp updated to that of the latest record in the mock data set
+    - 5 records published to kafka topic
      */
     private static final Logger log = LoggerFactory.getLogger(
-        Scenario4Test.class);
+        IngestScenario1Test.class);
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
     private @Value("${mode.delete}") boolean deletes;
@@ -73,7 +74,7 @@ public class Scenario4Test {
                 ('00000002-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file3.pdf', 'UPLOADED', timestamp '2023-03-22 14:00:00', NULL),
                 ('00000003-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-000000000000', 'ORIGINAL', 'decs-file4.pdf', 'UPLOADED', timestamp '2023-03-22 15:00:00', NULL),
                 ('00000004-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file5.pdf', 'UPLOADED', timestamp '2023-03-22 16:00:00', NULL),
-                ('00000005-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'NONEXISTENT-FILE.pdf', 'UPLOADED', timestamp '2023-03-22 17:00:00', NULL);
+                ('00000005-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file6.pdf', 'UPLOADED', timestamp '2023-03-22 17:00:00', NULL);
             """;
         TestUtils.setUpPostgres(this.jdbcTemplate, insertRecords);
 
@@ -102,16 +103,18 @@ public class Scenario4Test {
         this.jobLauncherTestUtils.setJob(job);
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
         writer.commitTimestamp(); // required to trigger the predestroy method during the test
-        assertEquals("FAILED", jobExecution.getExitStatus().getExitCode());
-        assertEquals("2023-03-22 16:00:00.0", TestUtils.getTimestampFromS3("untrusted-bucket", this.endpointURL, this.deletes));
 
         List<String> expectedDocs = Arrays.asList("00000000-aaaa-bbbb-cccc-000000000000",
                                                   "00000001-aaaa-bbbb-cccc-000000000000",
                                                   "00000002-aaaa-bbbb-cccc-000000000000",
-                                                  "00000004-aaaa-bbbb-cccc-000000000000");
+                                                  "00000004-aaaa-bbbb-cccc-000000000000",
+                                                  "00000005-aaaa-bbbb-cccc-000000000000");
 
+        assertEquals("COMPLETED", jobExecution.getExitStatus().getExitCode());
+        assertEquals("2023-03-22 17:00:00.0", TestUtils.getTimestampFromS3("untrusted-bucket", this.endpointURL, this.deletes));
         List<String> keysConsumed = TestUtils.consumeKafkaMessages(bootstrapServers, ingestTopic, 10);
-        assertEquals(4, keysConsumed.size());
+        assertEquals(5, keysConsumed.size()); // assert 5 records were written
+        // assert the 5 expected document id's were written (use HashSet to ignore order)
         assertEquals(new HashSet<String>(expectedDocs), new HashSet<String>(keysConsumed));
     }
 }
