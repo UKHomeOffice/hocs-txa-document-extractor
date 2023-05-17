@@ -22,7 +22,7 @@ to be running.
 3. A Kafka cluster
 
 This infrastructure can be spun up using the hocs-ci-infrastructure submodule
-with a `docker compose -f ./ci/docker-compose.yml up localstack postgres`.
+with a `docker compose -f ./ci/docker-compose.yml -f ./ci/docker-compose.kafka.yml up localstack postgres zookeeper broker`.
 
 The integration tests (located in `src/integration-test/`) can then be executed
 through your IDE.
@@ -32,6 +32,9 @@ some files to the s3 buckets and then run the Spring Batch job to test what
 happens in different scenarios. All data and files are removed during the tear
 down of each test.
 
+**_NOTE:_** `./ci/docker-compose.kafka.yml` also includes an optional control-center service
+which you can choose to docker compose up too. This provides a UI for the Kafka cluster
+on `localhost:9021` which can be used to aid manual testing & debugging.
 
 ## CI & Deployments
 TBC
