@@ -50,13 +50,15 @@ public class TxaKafkaItemWriter extends KafkaItemWriter<String, DocumentRow> {
         if (doc_list == null) {
             return;
         }
+        String docTimestamp = null;
         String checkpointTimestamp = null;
         for (DocumentRow doc : doc_list) {
-            log.info("Publishing event for doc=" + doc.getUuid() + " with timestamp=" + doc.getUpdatedOn().toString());
+            docTimestamp = this.deletes ? doc.getDeletedOn().toString() : doc.getUpdatedOn().toString();
+            log.info("Publishing event for doc=" + doc.getUuid() + " with timestamp=" + docTimestamp);
             String key = itemKeyMapper.convert(doc);
             writeKeyValue(key, doc);
 
-            checkpointTimestamp = doc.getUpdatedOn().toString();
+            checkpointTimestamp = docTimestamp;
         }
         /*
         Only update the checkpoint timestamp if the write is definitely successful.
