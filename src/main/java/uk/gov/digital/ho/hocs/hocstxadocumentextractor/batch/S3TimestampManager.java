@@ -32,12 +32,17 @@ public class S3TimestampManager {
     protected String targetBucket;
     protected URI endpointURL;
     protected String lastIngest;
+    protected String lastDelete;
+    protected boolean deletes;
+    protected String metadataFile;
     protected S3Client s3Client;
     protected Map<String, String> metadataJson;
 
     S3TimestampManager(String targetBucket,
                        String endpointURL,
-                       String lastIngest) throws URISyntaxException {
+                       String lastIngest,
+                       String lastDelete,
+                       boolean deletes) throws URISyntaxException {
         log.info("Constructing S3TimestampManager to GET/PUT timestamp metadata from/in: " + targetBucket);
 
         this.targetBucket = targetBucket;
@@ -48,6 +53,10 @@ public class S3TimestampManager {
             throw e;
         }
         this.lastIngest = lastIngest;
+        this.lastDelete = lastDelete;
+        this.deletes = deletes;
+        this.metadataFile = deletes ? "deletes.json" : "ingests.json";
+
 
         DefaultCredentialsProvider credentialsProvider = DefaultCredentialsProvider.create();
         Region region = Region.EU_WEST_2;
@@ -60,41 +69,53 @@ public class S3TimestampManager {
     }
 
     public String getTimestamp() throws IOException {
-        log.info("Attempting to GET the metadata.json file...");
+        log.info("Attempting to GET the metadata json file...");
         GetObjectRequest objectRequest = GetObjectRequest
             .builder()
-            .key("metadata.json")
+            .key(this.metadataFile)
             .bucket(this.targetBucket)
             .build();
         ResponseInputStream fullObject = this.s3Client.getObject(objectRequest);
 
         Map<String, String> metadata = readJsonBytes(fullObject);
         String result = metadata.get("lastSuccessfulCollection");
-        log.info("getTimestamp result is: " + result);
+        log.info("lastSuccessfulCollection is: " + result);
         this.metadataJson = metadata;
 
-        if (this.lastIngest != "") {
+        if (this.lastIngest != "" && !deletes) {
             /*
             This occurs after loading the metadata.json from S3 even if the env var is set so that
             the hashmap can be constructed from the real metadata.json file. Only then is the value
             in the hashmap overwritten with the value from the environment variable.
              */
-            log.info("$METADATA_LAST_INGEST is set => Overriding S3 timestamp with local environment variable");
-            log.info("$METADATA_LAST_INGEST=" + this.lastIngest);
+            log.info("lastSuccessfulCollection for INGEST is set => Overriding S3 timestamp with local value");
+            log.info("lastSuccessfulCollection=" + this.lastIngest);
             metadata.put("lastSuccessfulCollection", this.lastIngest);
             return this.lastIngest;
+        }
+
+        if (this.lastDelete != "" && deletes) {
+            /*
+            This occurs after loading the metadata.json from S3 even if the env var is set so that
+            the hashmap can be constructed from the real metadata.json file. Only then is the value
+            in the hashmap overwritten with the value from the environment variable.
+             */
+            log.info("lastSuccessfulCollection for DELETES is set => Overriding S3 timestamp with local value");
+            log.info("lastSuccessfulCollection=" + this.lastIngest);
+            metadata.put("lastSuccessfulCollection", this.lastIngest);
+            return this.lastDelete;
         }
 
         return result;
     }
 
     public boolean putTimestamp(String checkpointTimestamp) throws JsonProcessingException {
-        log.info("Attempting to PUT the updated metadata.json file...");
+        log.info("Attempting to PUT the updated metadata json file...");
         log.info("Got timestamp=" + checkpointTimestamp);
 
         PutObjectRequest objectRequest = PutObjectRequest.builder()
             .bucket(this.targetBucket)
-            .key("metadata.json")
+            .key(this.metadataFile)
             .build();
 
         this.metadataJson.put("lastSuccessfulCollection", checkpointTimestamp);

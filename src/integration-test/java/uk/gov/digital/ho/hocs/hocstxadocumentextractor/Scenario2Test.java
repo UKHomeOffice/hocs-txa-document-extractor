@@ -47,6 +47,7 @@ public class Scenario2Test {
         Scenario2Test.class);
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
+    private @Value("${mode.delete}") boolean deletes;
     private @Value("${s3.endpoint_url}") String endpointURL;
     private @Value("${kafka.bootstrap_servers}") String bootstrapServers;
     private @Value("${kafka.ingest_topic}") String ingestTopic;
@@ -121,7 +122,7 @@ public class Scenario2Test {
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
         writer.commitTimestamp(); // required to trigger the predestroy method during the test
         assertEquals("FAILED", jobExecution.getExitStatus().getExitCode());
-        assertEquals("2023-03-22 11:59:59", TestUtils.getTimestampFromS3("untrusted-bucket", this.endpointURL));
+        assertEquals("2023-03-22 11:59:59", TestUtils.getTimestampFromS3("untrusted-bucket", this.endpointURL, this.deletes));
 
         List<String> keysConsumed = TestUtils.consumeKafkaMessages(bootstrapServers, ingestTopic, 1);
         assertEquals(0, keysConsumed.size());

@@ -50,6 +50,7 @@ public class Scenario4Test {
         Scenario4Test.class);
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
+    private @Value("${mode.delete}") boolean deletes;
     private @Value("${s3.endpoint_url}") String endpointURL;
     private @Value("${kafka.bootstrap_servers}") String bootstrapServers;
     private @Value("${kafka.ingest_topic}") String ingestTopic;
@@ -102,7 +103,7 @@ public class Scenario4Test {
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
         writer.commitTimestamp(); // required to trigger the predestroy method during the test
         assertEquals("FAILED", jobExecution.getExitStatus().getExitCode());
-        assertEquals("2023-03-22 16:00:00.0", TestUtils.getTimestampFromS3("untrusted-bucket", this.endpointURL));
+        assertEquals("2023-03-22 16:00:00.0", TestUtils.getTimestampFromS3("untrusted-bucket", this.endpointURL, this.deletes));
 
         List<String> expectedDocs = Arrays.asList("00000000-aaaa-bbbb-cccc-000000000000",
                                                   "00000001-aaaa-bbbb-cccc-000000000000",

@@ -200,12 +200,13 @@ public class TestUtils {
         client.close();
     }
 
-    public static String getTimestampFromS3(String s3Bucket, String endpointURL) throws Exception {
+    public static String getTimestampFromS3(String s3Bucket, String endpointURL, boolean deletes) throws Exception {
         /*
         Get / parse the timestamp from the metadata.json in S3.
         Used in integration test assertions.
          */
-        log.info("loading metadata.json from S3: " + s3Bucket);
+        String metadataFile = deletes ? "deletes.json" : "ingests.json";
+        log.info("loading metadata json from S3: " + s3Bucket);
         DefaultCredentialsProvider credentialsProvider = DefaultCredentialsProvider.create();
         Region region = Region.EU_WEST_2;
         S3Client s3 = S3Client.builder()
@@ -216,7 +217,7 @@ public class TestUtils {
 
         GetObjectRequest objectRequest = GetObjectRequest
             .builder()
-            .key("metadata.json")
+            .key(metadataFile)
             .bucket(s3Bucket)
             .build();
 

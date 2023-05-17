@@ -22,6 +22,7 @@ public class KafkaConfiguration {
     private @Value("${kafka.bootstrap_servers}") String bootstrapServers;
     private @Value("${kafka.ingest_topic}") String ingestTopic;
     private @Value("${kafka.delete_topic}") String deleteTopic;
+    private @Value("${mode.delete}") boolean deletes;
 
     @Bean
     public ProducerFactory<String, DocumentRow> producerFactory() {
@@ -40,7 +41,11 @@ public class KafkaConfiguration {
     @Bean
     public KafkaTemplate<String, DocumentRow> kafkaTemplate() {
         KafkaTemplate<String, DocumentRow> kafkaTemplate = new KafkaTemplate<String, DocumentRow>(producerFactory());
-        kafkaTemplate.setDefaultTopic(ingestTopic);
+        if (deletes) {
+            kafkaTemplate.setDefaultTopic(deleteTopic);
+        } else {
+            kafkaTemplate.setDefaultTopic(ingestTopic);
+        }
         return kafkaTemplate;
     }
 }

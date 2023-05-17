@@ -2,6 +2,10 @@ info:
   app_name: hocs-txa-document-extractor
   environment: default
 
+mode:
+  # set to true to collect documents for deletion instead of ingestion
+  delete: ${MODE_DELETE:false}
+
 document-metadata:
   # Standard settings to configure PGDataSource
   driver: org.postgresql.Driver
@@ -25,9 +29,9 @@ document-metadata:
 s3:
   # Where documents are copied from
   source_bucket: ${S3_SOURCE_BUCKET:trusted-bucket}
-  # Where documents are copied to, where timestamp metadata lives
+  # Where documents are copied to, and where timestamp metadata lives
   target_bucket: ${S3_TARGET_BUCKET:untrusted-bucket}
-  # Primarily to support unit testing with localstack
+  # Endpoint for S3 client calls, to support testing with localstack
   endpoint_url: ${S3_ENDPOINT_URL:http://s3.localhost.localstack.cloud:4566}
 
 kafka:

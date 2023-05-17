@@ -20,8 +20,10 @@ public class JobStartFinishListener implements JobExecutionListener {
     JobStartFinishListener(String targetBucket,
                            String endpointURL,
                            String lastIngest,
+                           String lastDelete,
+                           boolean deletes,
                            SlackNotification slackNotification) throws URISyntaxException {
-        this.timestampManager = new S3TimestampManager(targetBucket, endpointURL, lastIngest);
+        this.timestampManager = new S3TimestampManager(targetBucket, endpointURL, lastIngest, lastDelete, deletes);
         this.slackNotification = slackNotification;
     }
 
@@ -53,7 +55,7 @@ public class JobStartFinishListener implements JobExecutionListener {
          */
         log.info("Executing afterJob tasks...");
 
-        // Notify
+        // Log stats
         LocalDateTime startTime = jobExecution.getStartTime();
         LocalDateTime endTime = jobExecution.getEndTime();
         long readCount = jobExecution.getExecutionContext().getLong("readCount");
@@ -66,6 +68,7 @@ public class JobStartFinishListener implements JobExecutionListener {
         log.info(String.format("docs/seconds~%.2f", docsPerSecond));
         log.info("Sending job outcome notifications...");
 
+        // Notify
         if(jobExecution.getStatus() == BatchStatus.COMPLETED) {
             log.info("Job outcome [SUCCESS]");
             String successMessage = this.slackNotification.craftSuccessMessage(readCount, noOfSeconds);

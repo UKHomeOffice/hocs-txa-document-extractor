@@ -18,40 +18,48 @@ public class SlackNotification {
         SlackNotification.class);
     private Map<String, String> slackURLMap;
     protected Slack slack;
+    protected boolean deletes;
 
-    SlackNotification(Map<String, String> slackURLMap) {
+    SlackNotification(Map<String, String> slackURLMap, boolean deletes) {
         this.slackURLMap = slackURLMap;
+        this.deletes = deletes;
         this.slack = Slack.getInstance();
     }
 
     public String craftSuccessMessage(long readCount, double noOfSeconds) {
+        String mode = this.deletes ? "Collection for Delete" : "Collection for Ingest";
         String successTemplate = """
-            DECS -> TXA Ingest Successful.
+            DECS -> TXA $mode Successful.
             $readCount documents ingested in $noOfSeconds seconds.""";
 
         final String successPayload = successTemplate
+            .replace("$mode", mode)
             .replace("$readCount", "" + readCount)
             .replace("$noOfSeconds", "" + noOfSeconds);
         return successPayload;
     }
 
     public String craftFailureMessage(String outcome) {
+        String mode = this.deletes ? "Collection for Delete" : "Collection for Ingest";
         String failureTemplate = """
-            DECS -> TXA Ingest Failed.
+            DECS -> TXA $mode Failed.
             Outcome was $outcome.""";
 
         final String failurePayload = failureTemplate
+            .replace("$mode", mode)
             .replace("$outcome", outcome);
         return failurePayload;
     }
 
     public String craftTimestampMessage(boolean success, String lastCheckpointTimestamp) {
+        String mode = this.deletes? "for deletes" : "for ingests";
         String timestampTemplate = """
-            lastSuccessfulTimestamp $timestamp
-            commit successful: $success.
+            lastSuccessfulCollection $mode = $timestamp
+            timestamp commit successful? $success.
             """;
 
         final String timestampPayload = timestampTemplate
+            .replace("$mode", mode)
             .replace("$timestamp", lastCheckpointTimestamp)
             .replace("$success", "" + success); // converts bool to string
         return timestampPayload;

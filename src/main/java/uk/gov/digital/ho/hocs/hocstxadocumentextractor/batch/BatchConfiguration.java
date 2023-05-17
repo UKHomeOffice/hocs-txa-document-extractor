@@ -34,13 +34,14 @@ public class BatchConfiguration {
     private @Value("${s3.endpoint_url}") String endpointURL;
     private @Value("${slack.decs_channel}") String decsSlackURL;
     private @Value("${slack.txa_channel}") String txaSlackURL;
+    private @Value("${mode.delete}") boolean deletes;
 
     @Bean
     public SlackNotification slackNotification() {
         Map<String, String> slackURLMap = new HashMap<String, String>();
         slackURLMap.put("txa", txaSlackURL);
         slackURLMap.put("decs", decsSlackURL);
-        return new SlackNotification(slackURLMap);
+        return new SlackNotification(slackURLMap, deletes);
     }
 
     @Bean
@@ -48,6 +49,8 @@ public class BatchConfiguration {
         return new JobStartFinishListener(targetBucket,
             endpointURL,
             lastIngest,
+            lastDelete,
+            deletes,
             slackNotification);
     }
 
@@ -68,7 +71,8 @@ public class BatchConfiguration {
         return new PostgresItemReader(metadataSource,
             metadataSchema,
             metadataTable,
-            fetchSize);
+            fetchSize,
+            deletes);
     }
 
     @Bean
@@ -78,7 +82,7 @@ public class BatchConfiguration {
 
     @Bean
     public TxaKafkaItemWriter writer(KafkaTemplate kafkaTemplate) throws Exception {
-        return new TxaKafkaItemWriter(targetBucket, endpointURL, txaSlackURL, decsSlackURL, kafkaTemplate);
+        return new TxaKafkaItemWriter(targetBucket, endpointURL, txaSlackURL, decsSlackURL, deletes, kafkaTemplate);
     }
 
     @Bean
@@ -89,6 +93,20 @@ public class BatchConfiguration {
                          TxaKafkaItemWriter writer,
                          ReadCountStepExecutionListener listener,
                          ExecutionContextPromotionListener promotionListener) {
+        if (deletes) {
+            /*
+            An identical step definition to ingest (not delete) mode except that
+            the processor (which copies documents between S3 buckets) is omitted.
+             */
+            return new StepBuilder("mainStep", jobRepository)
+                .startLimit(1)
+                .<DocumentRow, DocumentRow> chunk(chunkSize, transactionManager)
+                .reader(reader)
+                .writer(writer)
+                .listener(promotionListener)  // Must be declared first so its afterStep runs after the ReadCountStepExecutionListener
+                .listener(listener)
+                .build();
+        }
         return new StepBuilder("mainStep", jobRepository)
                 .startLimit(1)
                 .<DocumentRow, DocumentRow> chunk(chunkSize, transactionManager)

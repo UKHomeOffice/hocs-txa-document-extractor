@@ -51,6 +51,7 @@ public class Scenario1Test {
         uk.gov.digital.ho.hocs.hocstxadocumentextractor.Scenario1Test.class);
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
+    private @Value("${mode.delete}") boolean deletes;
     private @Value("${s3.endpoint_url}") String endpointURL;
     private @Value("${kafka.bootstrap_servers}") String bootstrapServers;
     private @Value("${kafka.ingest_topic}") String ingestTopic;
@@ -110,7 +111,7 @@ public class Scenario1Test {
                                                   "00000005-aaaa-bbbb-cccc-000000000000");
 
         assertEquals("COMPLETED", jobExecution.getExitStatus().getExitCode());
-        assertEquals("2023-03-22 17:00:00.0", TestUtils.getTimestampFromS3("untrusted-bucket", this.endpointURL));
+        assertEquals("2023-03-22 17:00:00.0", TestUtils.getTimestampFromS3("untrusted-bucket", this.endpointURL, this.deletes));
         List<String> keysConsumed = TestUtils.consumeKafkaMessages(bootstrapServers, ingestTopic, 10);
         assertEquals(5, keysConsumed.size()); // assert 5 records were written
         // assert the 5 expected document id's were written (use HashSet to ignore order)

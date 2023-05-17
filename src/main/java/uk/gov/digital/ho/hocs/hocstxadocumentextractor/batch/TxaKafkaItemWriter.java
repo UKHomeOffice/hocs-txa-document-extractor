@@ -28,17 +28,19 @@ public class TxaKafkaItemWriter extends KafkaItemWriter<String, DocumentRow> {
     private final String endpointURL;
     private final String txaSlackURL;
     private final String decsSlackURL;
+    private final boolean deletes;
     private final KafkaTemplate kafkaTemplate;
 
-    TxaKafkaItemWriter(String targetBucket, String endpointURL, String txaSlackURL, String decsSlackURL, KafkaTemplate kafkaTemplate) throws Exception {
+    TxaKafkaItemWriter(String targetBucket, String endpointURL, String txaSlackURL, String decsSlackURL, boolean deletes, KafkaTemplate kafkaTemplate) throws Exception {
         this.targetBucket = targetBucket;
         this.endpointURL = endpointURL;
         this.txaSlackURL = txaSlackURL;
         this.decsSlackURL = decsSlackURL;
+        this.deletes = deletes;
         this.kafkaTemplate = kafkaTemplate;
         setKafkaTemplate(kafkaTemplate);
         setItemKeyMapper(DocumentRow::getUuid);
-        setDelete(false);
+        setDelete(false); // not related to the HocsTxaDocumentExtractor delete functionality
         setTimeout(10000); // Milliseconds to wait for callback
         afterPropertiesSet();
     }
@@ -107,7 +109,9 @@ public class TxaKafkaItemWriter extends KafkaItemWriter<String, DocumentRow> {
             log.info("Trying to commit the last successful timestamp...");
             S3TimestampManager timestampManager = new S3TimestampManager(this.targetBucket,
                 this.endpointURL,
-                lastCheckpointTimestamp);
+                "",
+                "",
+                this.deletes);
 
             timestampManager.getTimestamp();
             boolean success = timestampManager.putTimestamp(lastCheckpointTimestamp);
@@ -115,7 +119,7 @@ public class TxaKafkaItemWriter extends KafkaItemWriter<String, DocumentRow> {
             Map<String, String> slackURLMap = new HashMap<String, String>();
             slackURLMap.put("txa", this.txaSlackURL);
             slackURLMap.put("decs", this.decsSlackURL);
-            SlackNotification slackNotification = new  SlackNotification(slackURLMap);
+            SlackNotification slackNotification = new  SlackNotification(slackURLMap, this.deletes);
             String timestampMessage = slackNotification.craftTimestampMessage(success, lastCheckpointTimestamp);
 
             if (success) {
