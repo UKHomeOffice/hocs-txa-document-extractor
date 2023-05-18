@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -35,6 +36,7 @@ public class DocumentSerializerTest {
         String type = "ORIGINAL";
         String pdfLink = "some-file.pdf";
         String status = "UPLOADED";
+        TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
         Timestamp updatedOn = Timestamp.valueOf("2007-09-23 10:10:10.0");
         Timestamp deletedOn = Timestamp.valueOf("2008-09-23 10:10:10.0");
         doc.setUuid(uuid);
@@ -58,15 +60,15 @@ public class DocumentSerializerTest {
         catch (IOException e) {
             throw e;
         }
-        long updatedOnEpoch = 1190538610000L;
-        long deletedOnEpoch = 1222161010000L;
-        assertEquals(document.get("uuid"), uuid);
-        assertEquals(document.get("externalReferenceUuid"), externalReferenceUuid);
-        assertEquals(document.get("caseType"), caseType);
-        assertEquals(document.get("type"), type);
-        assertEquals(document.get("pdfLink"), pdfLink);
-        assertEquals(document.get("status"), status);
-        assertEquals(document.get("updatedOn"), updatedOnEpoch);
-        assertEquals(document.get("deletedOn"), deletedOnEpoch);
+        long updatedOnEpoch = 1190542210000L;
+        long deletedOnEpoch = 1222164610000L;
+        assertEquals(uuid, document.get("uuid"));
+        assertEquals(externalReferenceUuid, document.get("externalReferenceUuid"));
+        assertEquals(caseType, document.get("caseType"));
+        assertEquals(type, document.get("type"));
+        assertEquals(pdfLink, document.get("pdfLink"));
+        assertEquals(status, document.get("status"));
+        assertEquals(updatedOnEpoch, document.get("updatedOn"));
+        assertEquals(deletedOnEpoch, document.get("deletedOn"));
     }
 }

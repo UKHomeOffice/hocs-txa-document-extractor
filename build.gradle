@@ -78,3 +78,12 @@ integrationTest {
 check.dependsOn integrationTest
 integrationTest.mustRunAfter test
 
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        events "started", "skipped", "passed", "failed"
+        showStandardStreams true
+    }
+    systemProperty "aws.accessKeyId", "test"
+    systemProperty "aws.secretAccessKey", "test"
+}
