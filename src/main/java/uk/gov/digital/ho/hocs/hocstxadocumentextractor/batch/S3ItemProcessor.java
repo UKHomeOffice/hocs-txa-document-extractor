@@ -8,6 +8,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import software.amazon.awssdk.services.s3.model.CopyObjectResponse;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.services.s3.model.S3Exception;
@@ -81,6 +82,7 @@ public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> 
             .sourceKey(objectKey)
             .destinationBucket(toBucket)
             .destinationKey(objectKey)
+            .acl(ObjectCannedACL.BUCKET_OWNER_FULL_CONTROL)
             .build();
 
         try {
@@ -99,6 +101,7 @@ public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> 
         PutObjectRequest objectRequest = PutObjectRequest.builder()
             .bucket(toBucket)
             .key(objectKey)
+            .acl(ObjectCannedACL.BUCKET_OWNER_FULL_CONTROL)
             .build();
 
         PutObjectResponse putResponse = s3.putObject(objectRequest, RequestBody.fromBytes(requestBody));
