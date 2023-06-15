@@ -23,8 +23,8 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.Delete;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
-import software.amazon.awssdk.services.s3.model.ListObjectsResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.transfer.s3.S3TransferManager;
@@ -159,12 +159,12 @@ public class TestUtils {
             .build();
 
         // first list all the objects in the s3
-        ListObjectsRequest listObjects = ListObjectsRequest
+        ListObjectsV2Request listObjects = ListObjectsV2Request
             .builder()
             .bucket(s3Bucket)
             .build();
 
-        ListObjectsResponse res = s3.listObjects(listObjects);
+        ListObjectsV2Response res = s3.listObjectsV2(listObjects);
         List<S3Object> objects = res.contents();
         ArrayList<ObjectIdentifier> keys = new ArrayList<>();
         ObjectIdentifier objectId;
@@ -273,6 +273,29 @@ public class TestUtils {
             });
         }
         return keysConsumed;
+    }
+
+    public static Integer countS3Objects(String bucketName, String endpointURL) throws Exception {
+        /*
+        Count the number of objects in the given S3 bucket. Used in integration test assertions
+         */
+
+        log.info("Counting objects in bucket: " + bucketName);
+        DefaultCredentialsProvider credentialsProvider = DefaultCredentialsProvider.create();
+        Region region = Region.EU_WEST_2;
+        S3Client s3 = S3Client.builder()
+            .region(region)
+            .credentialsProvider(credentialsProvider)
+            .endpointOverride(new URI(endpointURL))
+            .build();
+
+        ListObjectsV2Request request = ListObjectsV2Request.builder()
+            .bucket(bucketName)
+            .maxKeys(100)
+            .build();
+
+        ListObjectsV2Response result = s3.listObjectsV2(request);
+        return result.keyCount();
     }
 
 }
