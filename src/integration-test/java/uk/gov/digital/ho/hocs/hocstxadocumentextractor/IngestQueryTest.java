@@ -120,5 +120,9 @@ public class IngestQueryTest {
         assertEquals(8, keysConsumed.size()); // assert 5 records were written
         // assert the 5 expected document id's were written (use HashSet to ignore order)
         assertEquals(new HashSet<String>(expectedDocs), new HashSet<String>(keysConsumed));
+
+        // 1 pdf files + 1 related json files (because all pdfLinks in the mock data point to the same file)
+        // + 2 json files (ingest timestamp + delete timestamp)
+        assertEquals(4, TestUtils.countS3Objects("untrusted-bucket", this.endpointURL));
     }
 }

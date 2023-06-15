@@ -113,5 +113,8 @@ public class IngestScenario4Test {
         List<String> keysConsumed = TestUtils.consumeKafkaMessages(bootstrapServers, ingestTopic, 10);
         assertEquals(4, keysConsumed.size());
         assertEquals(new HashSet<String>(expectedDocs), new HashSet<String>(keysConsumed));
+
+        // 4 pdf files + 4 related json files + 2 json files (ingest timestamp + delete timestamp)
+        assertEquals(10, TestUtils.countS3Objects("untrusted-bucket", this.endpointURL));
     }
 }

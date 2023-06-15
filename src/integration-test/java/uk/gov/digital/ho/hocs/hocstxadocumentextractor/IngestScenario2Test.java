@@ -121,10 +121,14 @@ public class IngestScenario2Test {
         this.jobLauncherTestUtils.setJob(job);
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
         writer.commitTimestamp(); // required to trigger the predestroy method during the test
+
         assertEquals("FAILED", jobExecution.getExitStatus().getExitCode());
         assertEquals("2023-03-22 11:59:59", TestUtils.getTimestampFromS3("untrusted-bucket", this.endpointURL, this.deletes));
 
         List<String> keysConsumed = TestUtils.consumeKafkaMessages(bootstrapServers, ingestTopic, 1);
         assertEquals(0, keysConsumed.size());
+
+        // 2 json files (ingest timestamp + delete timestamp) - no files should have been copied in this scenario
+        assertEquals(2, TestUtils.countS3Objects("untrusted-bucket", this.endpointURL));
     }
 }

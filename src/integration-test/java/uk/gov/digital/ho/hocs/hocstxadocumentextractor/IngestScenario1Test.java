@@ -112,9 +112,14 @@ public class IngestScenario1Test {
 
         assertEquals("COMPLETED", jobExecution.getExitStatus().getExitCode());
         assertEquals("2023-03-22 17:00:00.0", TestUtils.getTimestampFromS3("untrusted-bucket", this.endpointURL, this.deletes));
+
         List<String> keysConsumed = TestUtils.consumeKafkaMessages(bootstrapServers, ingestTopic, 10);
         assertEquals(5, keysConsumed.size()); // assert 5 records were written
+
         // assert the 5 expected document id's were written (use HashSet to ignore order)
         assertEquals(new HashSet<String>(expectedDocs), new HashSet<String>(keysConsumed));
+
+        // 5 pdf files + 5 related json files + 2 json files (ingest timestamp + delete timestamp)
+        assertEquals(12, TestUtils.countS3Objects("untrusted-bucket", this.endpointURL));
     }
 }

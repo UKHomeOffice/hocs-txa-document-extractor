@@ -1,10 +1,15 @@
 package uk.gov.digital.ho.hocs.hocstxadocumentextractor.batch;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import software.amazon.awssdk.services.s3.model.CopyObjectResponse;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +22,7 @@ import java.net.URISyntaxException;
 public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> {
     private static final Logger log = LoggerFactory.getLogger(
         uk.gov.digital.ho.hocs.hocstxadocumentextractor.batch.S3ItemProcessor.class);
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private String sourceBucket;
     private String targetBucket;
@@ -49,11 +55,22 @@ public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> 
     }
 
     @Override
-    public DocumentRow process(final DocumentRow doc) throws S3Exception {
+    public DocumentRow process(final DocumentRow doc) throws S3Exception, JsonProcessingException {
         final String pdfLink = doc.getPdfLink();
-        log.info("Copying document: " + pdfLink);
+        log.info("Processing document: " + pdfLink);
 
+        log.info("Copying document");
         copyBucketObject(this.s3Client, this.sourceBucket, pdfLink, this.targetBucket);
+
+        log.info("Creating metadata json");
+        // don't attempt to replace possible existing .pdf extension to avoid handling cases
+        // where it might not exist
+        final String jsonLink = pdfLink + ".json";
+        byte[] metadataPayload = this.objectMapper.writeValueAsBytes(doc);
+
+        log.info("Uploading metadata json");
+        putBucketObject(this.s3Client, metadataPayload, jsonLink, this.targetBucket);
+
         return doc;
     }
 
@@ -67,8 +84,8 @@ public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> 
             .build();
 
         try {
-            CopyObjectResponse copyRes = s3.copyObject(copyReq);
-            return copyRes.copyObjectResult().toString();
+            CopyObjectResponse copyResponse = s3.copyObject(copyReq);
+            return copyResponse.copyObjectResult().toString();
 
         } catch (S3Exception e) {
             log.error(e.awsErrorDetails().errorMessage());
@@ -76,4 +93,16 @@ public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> 
         }
 
     }
+
+    public static String putBucketObject (S3Client s3, byte[] requestBody, String objectKey, String toBucket) {
+
+        PutObjectRequest objectRequest = PutObjectRequest.builder()
+            .bucket(toBucket)
+            .key(objectKey)
+            .build();
+
+        PutObjectResponse putResponse = s3.putObject(objectRequest, RequestBody.fromBytes(requestBody));
+        return putResponse.toString();
+    }
+
 }
