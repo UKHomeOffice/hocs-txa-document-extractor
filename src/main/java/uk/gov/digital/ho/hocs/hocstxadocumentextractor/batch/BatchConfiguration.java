@@ -22,6 +22,9 @@ import java.util.Map;
 
 @Configuration
 public class BatchConfiguration {
+    /*
+    Main configuration for the Spring Batch job.
+     */
 
     private @Value("${document-metadata.metadata_schema}") String metadataSchema;
     private @Value("${document-metadata.metadata_table}") String metadataTable;
@@ -38,6 +41,9 @@ public class BatchConfiguration {
 
     @Bean
     public SlackNotification slackNotification() {
+        /*
+        For crafting and sending slack notifications about job success / failure.
+         */
         Map<String, String> slackURLMap = new HashMap<String, String>();
         slackURLMap.put("txa", txaSlackURL);
         slackURLMap.put("decs", decsSlackURL);
@@ -46,6 +52,9 @@ public class BatchConfiguration {
 
     @Bean
     public JobStartFinishListener jobListener(SlackNotification slackNotification) throws URISyntaxException {
+        /*
+        For executing tasks before and after job execution.
+         */
         return new JobStartFinishListener(targetBucket,
             endpointURL,
             lastIngest,
@@ -68,6 +77,9 @@ public class BatchConfiguration {
 
     @Bean
     public PostgresItemReader reader(@Qualifier("metadataSource") DataSource metadataSource) {
+        /*
+        For reading rows from the DECS metadata database.
+         */
         return new PostgresItemReader(metadataSource,
             metadataSchema,
             metadataTable,
@@ -77,11 +89,17 @@ public class BatchConfiguration {
 
     @Bean
     public S3ItemProcessor processor() throws URISyntaxException {
+        /*
+        For copying objects between S3 buckets
+         */
         return new S3ItemProcessor(sourceBucket, targetBucket, endpointURL);
     }
 
     @Bean
     public TxaKafkaItemWriter writer(KafkaTemplate kafkaTemplate) throws Exception {
+        /*
+        For publishing documents to Kafka
+         */
         return new TxaKafkaItemWriter(targetBucket, endpointURL, txaSlackURL, decsSlackURL, deletes, kafkaTemplate);
     }
 
@@ -93,6 +111,9 @@ public class BatchConfiguration {
                          TxaKafkaItemWriter writer,
                          ReadCountStepExecutionListener listener,
                          ExecutionContextPromotionListener promotionListener) {
+        /*
+        Defines a Spring Batch Step by combining an ItemReader, ItemProcessor and ItemWriter.
+         */
         if (deletes) {
             /*
             An identical step definition to ingest (not delete) mode except that
@@ -122,6 +143,9 @@ public class BatchConfiguration {
     public Job documentExtractionJob(JobRepository jobRepository,
                                      JobStartFinishListener listener,
                                      Step mainStep) {
+        /*
+        Defines the Spring Batch Job.
+         */
         return new JobBuilder("documentExtractionJob", jobRepository)
             .incrementer(new RunIdIncrementer())
             .listener(listener)

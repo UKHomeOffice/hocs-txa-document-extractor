@@ -58,15 +58,15 @@ public class PostgresItemReader extends JdbcCursorItemReader<DocumentRow> {
         JobExecution jobExecution = stepExecution.getJobExecution();
         ExecutionContext jobContext = jobExecution.getExecutionContext();
         String timestamp = jobContext.getString("lastSuccessfulCollection");
-        log.info("Found: " + timestamp);
+        log.info("Found timestamp: " + timestamp);
         this.lastSuccessfulCollection = timestamp;
 
         String templateSQL;
         if (this.deletes) {
-            log.info("Application is in DELETE mode. Will query documents to collect for deletion.");
+            log.info("Application is in DELETE mode. It will query documents to collect for deletion.");
             templateSQL = getDeleteQuery();
         } else {
-            log.info("Application is in INGEST mode. Will query documents to collect for ingestion.");
+            log.info("Application is in INGEST mode. It will query documents to collect for ingestion.");
             templateSQL = getIngestQuery();
         }
 
@@ -142,8 +142,8 @@ public class PostgresItemReader extends JdbcCursorItemReader<DocumentRow> {
 
         This query looks for all newly deleted relevant documents since the last collection of deletes
         plus a window of 1 week. This additional 1 week is meant to ensure all deletes are fully
-        propagated downstream and deal with the case where a delete message is processed before an
-        ingest message is fully complete.
+        propagated downstream and deal with the edge case where a delete message is processed by the
+        downstream application before an ingest message is fully processed.
          */
         String deleteQuery = """
             WITH all_case_document_types AS (

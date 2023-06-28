@@ -22,9 +22,8 @@ import java.util.Map;
 
 public class S3TimestampManager {
     /*
-    Responsible for getting/reading/writing/putting the metadata record
-    on the S3 bucket which defines the timestamp of the last successful
-    ingested or deleted document.
+    Responsible for reading/writing the record on the target S3 bucket which defines the
+    timestamp of the last successfully ingested and last successfully deleted documents.
      */
     private static final Logger log = LoggerFactory.getLogger(
         S3TimestampManager.class);
@@ -55,8 +54,7 @@ public class S3TimestampManager {
         this.lastIngest = lastIngest;
         this.lastDelete = lastDelete;
         this.deletes = deletes;
-        this.metadataFile = deletes ? "deletes.json" : "ingests.json";
-
+        this.metadataFile = deletes ? "deletes.json" : "ingests.json"; // delete and ingest timestamps are tracked separately.
 
         DefaultCredentialsProvider credentialsProvider = DefaultCredentialsProvider.create();
         Region region = Region.EU_WEST_2;
@@ -69,7 +67,7 @@ public class S3TimestampManager {
     }
 
     public String getTimestamp() throws IOException {
-        log.info("Attempting to GET the metadata json file...");
+        log.info("Attempting to get the last successful collection timestamp...");
         GetObjectRequest objectRequest = GetObjectRequest
             .builder()
             .key(this.metadataFile)
@@ -110,8 +108,8 @@ public class S3TimestampManager {
     }
 
     public boolean putTimestamp(String checkpointTimestamp) throws JsonProcessingException {
-        log.info("Attempting to PUT the updated metadata json file...");
-        log.info("Got timestamp=" + checkpointTimestamp);
+        log.info("Attempting to put the updated last successful collection timestamp...");
+        log.info("Updating to: " + checkpointTimestamp);
 
         PutObjectRequest objectRequest = PutObjectRequest.builder()
             .bucket(this.targetBucket)
@@ -124,6 +122,7 @@ public class S3TimestampManager {
 
         PutObjectResponse objectResponse = this.s3Client.putObject(objectRequest, RequestBody.fromBytes(requestBody));
         if (objectResponse.sdkHttpResponse().isSuccessful()) {
+            log.info("Update successful");
             return true;
         }
         return false;

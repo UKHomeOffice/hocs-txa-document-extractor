@@ -14,8 +14,7 @@ public class SlackNotification {
     /*
     Responsible for crafting and sending notification messages to Slack.
      */
-    private static final Logger log = LoggerFactory.getLogger(
-        SlackNotification.class);
+    private static final Logger log = LoggerFactory.getLogger(SlackNotification.class);
     private Map<String, String> slackURLMap;
     protected Slack slack;
     protected boolean deletes;
@@ -52,7 +51,7 @@ public class SlackNotification {
     }
 
     public String craftTimestampMessage(boolean success, String lastCheckpointTimestamp) {
-        String mode = this.deletes? "for deletes" : "for ingests";
+        String mode = this.deletes ? "for deletes" : "for ingests";
         String timestampTemplate = """
             lastSuccessfulCollection $mode = $timestamp
             timestamp commit successful? $success.
@@ -91,7 +90,7 @@ public class SlackNotification {
         int responseCode = response.getCode();
         if (responseCode == 200) {
             log.info("Notification to " + channelSelector + " sent successfully");
-        } else {
+        } else { // do not throw an exception if the slack notification fails
             log.error("Notification to " + channelSelector + " failed");
             log.error("Response code was " + responseCode);
             log.error(response.getBody());

@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ReadCountStepExecutionListener implements StepExecutionListener {
+    /*
+    Responsible for counting the number of documents processed in a single batch.
+     */
 
     private static final Logger log = LoggerFactory.getLogger(ReadCountStepExecutionListener.class);
 

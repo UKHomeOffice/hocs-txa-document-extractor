@@ -42,6 +42,7 @@ public class IngestScenario2Test {
 
     The expected outcome of the Job is failure with the timestamp unchanged and 0 records
     published to Kafka.
+    - 2 records should be in the target s3 bucket (1 for each of the ingest/delete timestamps)
      */
     private static final Logger log = LoggerFactory.getLogger(
         IngestScenario2Test.class);

@@ -14,15 +14,14 @@ document-metadata:
   PortNumber: ${METADATA_SOURCE_PORT:5432}
   User: ${METADATA_SOURCE_USER:root}
   Password: ${METADATA_SOURCE_PASSWORD:dev}
-  # Determine
   metadata_schema: ${METADATA_SOURCE_SCHEMA:metadata}
   metadata_table: ${METADATA_SOURCE_TABLE:document_metadata}
-  # fetch_size determines how many records are fetched from the database
+  # fetch_size determines how many records are fetched from the database in one call
   fetch_size: ${METADATA_FETCH_SIZE:2}
   # chunk_size determines how many records are read/processed before writing
   chunk_size: ${METADATA_CHUNK_SIZE:2}
   # Timestamps are expected as strings in format "YYYY-MM-DD HH:mm:SS"
-  # No timestamp => value is obtained from the target s3 bucket
+  # No timestamp => values are obtained from the target s3 bucket
   last_ingest: ${METADATA_LAST_INGEST:}
   last_delete: ${METADATA_LAST_DELETE:}
 

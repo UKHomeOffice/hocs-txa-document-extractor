@@ -31,7 +31,9 @@ public class JobStartFinishListener implements JobExecutionListener {
 
     @Override
     public void beforeJob(JobExecution jobExecution) {
-        // Get timestamp
+        /*
+        Load last successful collection timestamp from the target S3.
+         */
         String mode = this.deletes ? "DELETE" : "INGEST";
         log.info(String.format("Application is running in %s mode.", mode));
         log.info("Executing beforeJob tasks...");
@@ -55,24 +57,25 @@ public class JobStartFinishListener implements JobExecutionListener {
         The commit of the timestamp occurs in the PreDestroy method of the ItemWriter class instead
         of here so that we can be sure it is attempted even if the job is interrupted.
 
-        This method is responsible for success and failure notifications.
+        This method is responsible for computing some runtime stats and success and failure notifications.
          */
         log.info("Executing afterJob tasks...");
 
-        // Log stats
+        // Compute & log some runtime stats
         LocalDateTime startTime = jobExecution.getStartTime();
         LocalDateTime endTime = jobExecution.getEndTime();
         long readCount = jobExecution.getExecutionContext().getLong("readCount");
-        log.info("Started=" + startTime);
-        log.info("Finished=" + endTime);
-        log.info("readCount=" + readCount);
+        log.info("Runtime Statistics:");
+        log.info("Started at " + startTime);
+        log.info("Finished at " + endTime);
+        log.info("Number of documents processed was " + readCount);
         long noOfMillis = ChronoUnit.MILLIS.between(startTime,endTime);
         double noOfSeconds = noOfMillis / 1000.0;
         double docsPerSecond = readCount / noOfSeconds;
-        log.info(String.format("docs/seconds~%.2f", docsPerSecond));
-        log.info("Sending job outcome notifications...");
+        log.info(String.format("docs/seconds ~ %.2f", docsPerSecond));
 
         // Notify
+        log.info("Sending job outcome notifications...");
         if(jobExecution.getStatus() == BatchStatus.COMPLETED) {
             log.info("Job outcome [SUCCESS]");
             String successMessage = this.slackNotification.craftSuccessMessage(readCount, noOfSeconds);

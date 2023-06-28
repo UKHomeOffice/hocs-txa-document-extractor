@@ -40,11 +40,12 @@ public class IngestScenario4Test {
 
     This scenario simulates the case where there is an error during the last chunk of documents
     to process. This scenario creates this error by making the s3_key of the last record one
-    that does not exist in the S3. This scenario is one example of the case where it is not the
+    that does not exist in the S3. This scenario is an example of the case where it is not the
     first chunk that fails.
 
     The expected outcome is a failed Job but with the timestamp updated to the latest timestamp of
     the last successful chunk within the Job and 4 records written to Kafka.
+    We expect 10 files in the target s3 (4 pdf files + 4 related json files + 2 timestamp files)
      */
     private static final Logger log = LoggerFactory.getLogger(
         IngestScenario4Test.class);

@@ -217,7 +217,7 @@ public class S3TimestampManagerTest {
         /*
         Test readJsonBytes throws an exception when provided invalid json to parse
          */
-        // Mock an acceptable input to the readJsonBytes method
+        // Mock an malformed input to the readJsonBytes method
         boolean deletes = false;
         S3TimestampManager timestampManager = new S3TimestampManager("bucket",
             "http://endpoint.url",

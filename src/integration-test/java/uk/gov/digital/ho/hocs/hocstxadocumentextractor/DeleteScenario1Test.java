@@ -41,7 +41,7 @@ public class DeleteScenario1Test {
     The expected outcome is:
     - a successfully completed Job
     - the timestamp updated to that of the latest record in the mock data set
-    - 5 records published to kafka topic
+    - 5 records published to the deletes kafka topic
      */
     private static final Logger log = LoggerFactory.getLogger(
         DeleteScenario1Test.class);

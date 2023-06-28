@@ -46,7 +46,7 @@ import java.util.UUID;
 
 public class TestUtils {
     /*
-    Class contains methods used by numerous integration test scenarios
+    Class contains methods used by different integration test scenarios
     for setUp, tearDown or making assertions.
      */
     private static final Logger log = LoggerFactory.getLogger(
@@ -244,8 +244,8 @@ public class TestUtils {
         Map<String, Object> conf = new HashMap<>();
         conf.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         /*
-        Using the same group name repeatedly across tests causes slow re-balancing
-        so generate a random string from uuid to use as the consumer group name.
+        Using the same group name repeatedly across tests causes slow re-balancing of consumer
+        groups so generate a random string from uuid to use as the consumer group name in each test.
          */
         UUID uuid = UUID.randomUUID();
         conf.put(ConsumerConfig.GROUP_ID_CONFIG, uuid.toString());
@@ -253,7 +253,7 @@ public class TestUtils {
         conf.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         conf.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         /*
-        Since we don't care about the message values for these tests, just use a
+        Since we don't care about the message values for these test assertions, just use a
         StringDeserializer instead of creating a proper custom DocumentDeserializer
          */
         final Consumer<String, String> consumer = new KafkaConsumer<String, String>(conf);
@@ -277,7 +277,7 @@ public class TestUtils {
 
     public static Integer countS3Objects(String bucketName, String endpointURL) throws Exception {
         /*
-        Count the number of objects in the given S3 bucket. Used in integration test assertions
+        Count the number of objects in the given S3 bucket. Used in integration test assertions.
          */
 
         log.info("Counting objects in bucket: " + bucketName);

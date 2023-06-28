@@ -45,7 +45,8 @@ public class IngestScenario1Test {
     The expected outcome is:
     - a successfully completed Job
     - the timestamp updated to that of the latest record in the mock data set
-    - 5 records published to kafka topic
+    - 5 records published to ingests kafka topic
+    - 12 records in the target s3 bucket (1 pdf and 1 metadata per document copied plus 2 files for the timestamps)
      */
     private static final Logger log = LoggerFactory.getLogger(
         IngestScenario1Test.class);

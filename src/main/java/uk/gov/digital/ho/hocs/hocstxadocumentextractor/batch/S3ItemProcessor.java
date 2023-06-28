@@ -21,6 +21,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> {
+    /*
+    This class is responsible for copying files between the source and target buckets.
+    It copies documents identified by the PostgresItemReader.
+    For each document copied, it also creates a json file on the target bucket containing
+    the relevant metadata for that document.
+     */
     private static final Logger log = LoggerFactory.getLogger(
         uk.gov.digital.ho.hocs.hocstxadocumentextractor.batch.S3ItemProcessor.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -31,9 +37,6 @@ public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> 
     private S3Client s3Client;
 
     S3ItemProcessor(String sourceBucket, String targetBucket, String endpointURL) throws URISyntaxException {
-        /*
-        Responsible for copying files between two S3 buckets.
-         */
         log.info("Constructing S3ItemProcessor to transfer objects from: " + sourceBucket + " to: " + targetBucket);
 
         this.sourceBucket = sourceBucket;
@@ -82,7 +85,8 @@ public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> 
             .sourceKey(objectKey)
             .destinationBucket(toBucket)
             .destinationKey(objectKey)
-            .acl(ObjectCannedACL.BUCKET_OWNER_FULL_CONTROL)
+            .acl(ObjectCannedACL.BUCKET_OWNER_FULL_CONTROL)  // required for owner of target bucket to control the file.
+            // see https://docs.aws.amazon.com/AmazonS3/latest/userguide/acl-overview.html#canned-acl
             .build();
 
         try {
@@ -101,7 +105,8 @@ public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> 
         PutObjectRequest objectRequest = PutObjectRequest.builder()
             .bucket(toBucket)
             .key(objectKey)
-            .acl(ObjectCannedACL.BUCKET_OWNER_FULL_CONTROL)
+            .acl(ObjectCannedACL.BUCKET_OWNER_FULL_CONTROL)  // required for owner of target bucket to control the file.
+            // see https://docs.aws.amazon.com/AmazonS3/latest/userguide/acl-overview.html#canned-acl
             .build();
 
         PutObjectResponse putResponse = s3.putObject(objectRequest, RequestBody.fromBytes(requestBody));

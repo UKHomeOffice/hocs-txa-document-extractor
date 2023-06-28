@@ -1,6 +1,8 @@
 package uk.gov.digital.ho.hocs.hocstxadocumentextractor.batch;
 
+import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.config.SslConfigs;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +19,7 @@ import java.util.Map;
 @Configuration
 public class KafkaConfiguration {
     /*
-
+    Configuration for the Kafka Producer used in the Spring Batch job.
      */
     private @Value("${kafka.bootstrap_servers}") String bootstrapServers;
     private @Value("${kafka.ingest_topic}") String ingestTopic;
@@ -34,12 +36,20 @@ public class KafkaConfiguration {
         configProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, DocumentSerializer.class);
+//        configProperties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL");
+//        configProperties.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PEM");
+//        configProperties.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, "/etc/msk-certs/tls.key");
+//        configProperties.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "PEM");
+//        configProperties.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, "/etc/msk-certs/tls.cert");
 
         return new DefaultKafkaProducerFactory<>(configProperties);
     }
 
     @Bean
     public KafkaTemplate<String, DocumentRow> kafkaTemplate() {
+        /*
+        Sets the topic the producer should send messages to.
+         */
         KafkaTemplate<String, DocumentRow> kafkaTemplate = new KafkaTemplate<String, DocumentRow>(producerFactory());
         if (deletes) {
             kafkaTemplate.setDefaultTopic(deleteTopic);

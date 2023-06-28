@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ActiveProfiles("integration") // stops job being launched during unit test
+@ActiveProfiles("integration") // stops the job being launched during unit test
 public class HocsTxaDocumentExtractorApplicationTest {
 
     @Test

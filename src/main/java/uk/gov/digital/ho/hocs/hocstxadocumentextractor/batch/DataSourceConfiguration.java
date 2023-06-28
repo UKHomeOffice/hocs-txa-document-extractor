@@ -12,6 +12,9 @@ import javax.sql.DataSource;
 
 @Configuration
 public class DataSourceConfiguration {
+    /*
+    Configuration for the data sources of the Spring Batch job.
+     */
 
     @Bean
     @Primary

@@ -42,6 +42,7 @@ public class IngestScenario3Test {
 
     The expected outcome is a failed Job with the timestamp unchanged and 0 records published
     to Kafka.
+    - 4 records should be in the target s3 bucket (1 pdf and 1 metadata for the copied document, 2 for the timestamps)
      */
     private static final Logger log = LoggerFactory.getLogger(
         IngestScenario3Test.class);
