@@ -28,3 +28,6 @@
 
 ### VS Code ###
 /bin/
+
+### macOS ###
+.DS_Store
