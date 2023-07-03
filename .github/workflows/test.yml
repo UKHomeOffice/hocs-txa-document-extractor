@@ -5,14 +5,14 @@ on:
 
 jobs:
   unit-test:
-    uses: UKHomeOffice/sas-github-workflows/.github/workflows/test-gradle.yml@v1
+    uses: UKHomeOffice/sas-github-workflows/.github/workflows/test-gradle.yml@v2
     with:
       testCommand: 'test --no-daemon'
     secrets: inherit
 
   integration-test:
     needs: unit-test  # avoid test-gradle cancelling one of the test jobs.
-    uses: UKHomeOffice/sas-github-workflows/.github/workflows/test-gradle.yml@v1
+    uses: UKHomeOffice/sas-github-workflows/.github/workflows/test-gradle.yml@v2
     with:
       dockerComposeComponents: 'localstack postgres zookeeper broker'
       dockerComposeCommand: './ci/docker-compose.yml -f ./ci/docker-compose.kafka.yml'
