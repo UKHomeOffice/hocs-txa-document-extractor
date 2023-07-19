@@ -58,6 +58,7 @@ public class TxaKafkaItemWriter extends KafkaItemWriter<String, DocumentRow> {
         String checkpointTimestamp = null;
         for (DocumentRow doc : doc_list) {
             docTimestamp = this.deletes ? doc.getDeletedOn().toString() : doc.getUpdatedOn().toString();
+            doc.setPdfLink("decs/" + doc.getPdfLink());  // S3ItemProcessor adds a prefix to the pdfLink when writing
             log.info("Publishing event for doc=" + doc.getUuid() + " with timestamp=" + docTimestamp);
             String key = itemKeyMapper.convert(doc);
             writeKeyValue(key, doc);
@@ -65,7 +66,7 @@ public class TxaKafkaItemWriter extends KafkaItemWriter<String, DocumentRow> {
             checkpointTimestamp = docTimestamp;
         }
         /*
-        Only update the checkpointTimestamp in memory if the write to Kafka is definitely successful.
+        Only update the checkpointTimestamp in memory if writing to Kafka is definitely successful.
         Updating the checkpointTimestamp is the application committing the progress of the job.
 
         flush() should throw an exception if there is an error with the delivery of a

@@ -17,13 +17,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import uk.gov.digital.ho.hocs.hocstxadocumentextractor.batch.TxaKafkaItemWriter;
 import uk.gov.digital.ho.hocs.hocstxadocumentextractor.utils.TestUtils;
 
 import javax.sql.DataSource;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,9 +69,9 @@ public class DeleteQueryTest {
             """;
         TestUtils.setUpPostgres(this.jdbcTemplate, insertRecords);
 
-        Path path = FileSystems.getDefault().getPath("src", "integration-test","resources","trusted-s3-data");
+        Path path = Paths.get("src", "integration-test","resources","trusted-s3-data");
         TestUtils.setUpS3(path, "trusted-bucket", this.endpointURL);
-        Path otherPath = FileSystems.getDefault().getPath("src", "integration-test","resources","untrusted-s3-data");
+        Path otherPath = Paths.get("src", "integration-test","resources","untrusted-s3-data");
         TestUtils.setUpS3(otherPath, "untrusted-bucket", this.endpointURL);
 
         Map<String, Object> conf = new HashMap<>();

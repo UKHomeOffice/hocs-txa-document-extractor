@@ -60,31 +60,30 @@ public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> 
 
     @Override
     public DocumentRow process(final DocumentRow doc) throws S3Exception, JsonProcessingException {
-        final String pdfLink = doc.getPdfLink();
-        log.info("Processing document: " + pdfLink);
-
-        log.info("Copying document");
-        copyBucketObject(this.s3Client, this.sourceBucket, pdfLink, this.targetBucket);
-
-        log.info("Creating metadata json");
+        final String sourceKey = doc.getPdfLink();
+        final String destinationKey = "decs/" + sourceKey;  // add prefix to segregate data in destination bucket
         // don't attempt to replace possible existing .pdf extension to avoid handling cases
         // where it might not exist
-        final String jsonLink = pdfLink + ".json";
-        byte[] metadataPayload = this.objectMapper.writeValueAsBytes(doc);
+        final String jsonKey = destinationKey + ".json";
+        log.info("Processing document: " + sourceKey);
 
-        log.info("Uploading metadata json");
-        putBucketObject(this.s3Client, metadataPayload, jsonLink, this.targetBucket);
+        log.info("Copying document");
+        copyBucketObject(this.s3Client, this.sourceBucket, sourceKey, this.targetBucket, destinationKey);
+
+        log.info("Creating & uploading metadata json");
+        byte[] metadataPayload = this.objectMapper.writeValueAsBytes(doc);
+        putBucketObject(this.s3Client, metadataPayload, jsonKey, this.targetBucket);
 
         return doc;
     }
 
-    public static String copyBucketObject (S3Client s3, String fromBucket, String objectKey, String toBucket) {
+    public static String copyBucketObject (S3Client s3, String fromBucket, String sourceKey, String toBucket, String destinationKey) {
 
         CopyObjectRequest copyReq = CopyObjectRequest.builder()
             .sourceBucket(fromBucket)
-            .sourceKey(objectKey)
+            .sourceKey(sourceKey)
             .destinationBucket(toBucket)
-            .destinationKey(objectKey)
+            .destinationKey(destinationKey)
             .acl(ObjectCannedACL.BUCKET_OWNER_FULL_CONTROL)  // required for owner of target bucket to control the file.
             // see https://docs.aws.amazon.com/AmazonS3/latest/userguide/acl-overview.html#canned-acl
             .build();
