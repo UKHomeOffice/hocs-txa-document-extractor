@@ -55,7 +55,7 @@ public class S3TimestampManager {
         this.lastIngest = lastIngest;
         this.lastDelete = lastDelete;
         this.deletes = deletes;
-        this.metadataFile = deletes ? "deletes.json" : "ingests.json"; // delete and ingest timestamps are tracked separately.
+        this.metadataFile = deletes ? "decs/deletes.json" : "decs/ingests.json"; // delete and ingest timestamps are tracked separately.
 
         DefaultCredentialsProvider credentialsProvider = DefaultCredentialsProvider.create();
         Region region = Region.EU_WEST_2;

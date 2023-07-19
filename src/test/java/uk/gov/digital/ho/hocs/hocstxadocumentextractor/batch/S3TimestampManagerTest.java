@@ -47,7 +47,7 @@ public class S3TimestampManagerTest {
         assertNotNull(timestampManager.endpointURL);
         assertNotNull(timestampManager.lastIngest);
         assertNotNull(timestampManager.lastDelete);
-        assertEquals(timestampManager.metadataFile, "ingests.json");
+        assertEquals(timestampManager.metadataFile, "decs/ingests.json");
         assertNotNull(timestampManager.s3Client);
     }
 

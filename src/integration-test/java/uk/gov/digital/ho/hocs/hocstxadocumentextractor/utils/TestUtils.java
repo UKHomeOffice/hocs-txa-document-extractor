@@ -205,7 +205,7 @@ public class TestUtils {
         Get / parse the timestamp from the metadata.json in S3.
         Used in integration test assertions.
          */
-        String metadataFile = deletes ? "deletes.json" : "ingests.json";
+        String metadataFile = deletes ? "decs/deletes.json" : "decs/ingests.json";
         log.info("loading metadata json from S3: " + s3Bucket);
         DefaultCredentialsProvider credentialsProvider = DefaultCredentialsProvider.create();
         Region region = Region.EU_WEST_2;
