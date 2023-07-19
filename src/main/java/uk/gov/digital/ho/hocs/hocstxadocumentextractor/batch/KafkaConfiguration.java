@@ -37,13 +37,11 @@ public class KafkaConfiguration {
         configProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, DocumentSerializer.class);
         // Use TLS for the real kafka cluster but not for a local docker-composed kafka cluster
-//        if (!bootstrapServers.equals("localhost:9092")) {
-//            configProperties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL");
-//            configProperties.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PEM");
-//            configProperties.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, "/etc/msk-certs/tls.key");
-//            configProperties.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "PEM");
-//            configProperties.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, "/etc/msk-certs/tls.crt");
-//        }
+        if (!bootstrapServers.equals("localhost:9092")) {
+            configProperties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL");
+            configProperties.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PEM");
+            configProperties.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, "/etc/msk-certs/tls.key");
+        }
 
         return new DefaultKafkaProducerFactory<>(configProperties);
     }
