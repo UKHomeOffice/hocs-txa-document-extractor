@@ -29,8 +29,9 @@ public class ReadCountStepExecutionListener implements StepExecutionListener {
         } else {
             log.info("Processed " + readCount + " records");
         }
-        // Write the readCount to the step context so it can be promoted to the job context
+        // Write the readCount to the step context so that it can be promoted to the job context
         // and reported on in the afterJob listener.
+        log.info("Writing the readCount to the step execution context");
         ExecutionContext stepContext = stepExecution.getExecutionContext();
         stepContext.putLong("readCount", readCount);
         return null;

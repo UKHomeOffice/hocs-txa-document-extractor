@@ -65,12 +65,12 @@ public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> 
         // don't attempt to replace possible existing .pdf extension to avoid handling cases
         // where it might not exist
         final String jsonKey = destinationKey + ".json";
-        log.info("Processing document: " + sourceKey);
+        log.info("Processing document with externalReferenceUuid " + doc.getExternalReferenceUuid());
 
-        log.info("Copying document");
+        log.debug("Copying document");
         copyBucketObject(this.s3Client, this.sourceBucket, sourceKey, this.targetBucket, destinationKey);
 
-        log.info("Creating & uploading metadata json");
+        log.debug("Creating & uploading metadata json");
         byte[] metadataPayload = this.objectMapper.writeValueAsBytes(doc);
         putBucketObject(this.s3Client, metadataPayload, jsonKey, this.targetBucket);
 
