@@ -24,6 +24,7 @@ public class KafkaConfiguration {
     private @Value("${kafka.bootstrap_servers}") String bootstrapServers;
     private @Value("${kafka.ingest_topic}") String ingestTopic;
     private @Value("${kafka.delete_topic}") String deleteTopic;
+    private @Value("${kafka.use_ssl}") boolean useSSL;
     private @Value("${mode.delete}") boolean deletes;
 
     @Bean
@@ -36,8 +37,9 @@ public class KafkaConfiguration {
         configProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, DocumentSerializer.class);
-        // Use TLS for the real kafka cluster but not for a local docker-composed kafka cluster
-        if (!bootstrapServers.equals("localhost:9092")) {
+
+        // Use TLS for the real kafka clusters but not for a local docker-composed kafka cluster
+        if (useSSL) {
             configProperties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL");
             configProperties.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PEM");
             configProperties.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, "/etc/msk-certs/tls.key");

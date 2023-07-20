@@ -18,7 +18,7 @@ document-metadata:
   metadata_table: ${METADATA_SOURCE_TABLE:document_metadata}
   # fetch_size determines how many records are fetched from the database in one call
   fetch_size: ${METADATA_FETCH_SIZE:2}
-  # chunk_size determines how many records are read/processed before writing
+  # chunk_size determines how many records are read/processed before writing to Kafka
   chunk_size: ${METADATA_CHUNK_SIZE:2}
   # Timestamps are expected as strings in format "YYYY-MM-DD HH:mm:SS"
   # No timestamp => values are obtained from the target s3 bucket
@@ -39,9 +39,11 @@ kafka:
   ingest_topic: ${KAFKA_INGEST_TOPIC:txa-decs-ingests}
   # Where to post events for documents to delete
   delete_topic: ${KAFKA_DELETE_TOPIC:txa-decs-deletes}
+  # Enable/Disable TLS encryption between Kafka client and broker
+  use_ssl: ${KAFKA_USE_SSL:false}
 
 slack:
-  # Webhook URLs for Slack notifications
+  # Webhook URLs for Slack notifications - if left null, notifications to that channel are skipped.
   decs_channel: ${SLACK_DECS_URL:}
   txa_channel: ${SLACK_TXA_URL:}
 
@@ -59,6 +61,6 @@ spring:
       on-profile: integration
   batch:
     job:
-      enabled: false
+      enabled: false  # disable the automatic execution of the job when testing.
 
 ...
