@@ -43,7 +43,7 @@ public class TxaKafkaItemWriter extends KafkaItemWriter<String, DocumentRow> {
         this.deletes = deletes;
         this.kafkaTemplate = kafkaTemplate;
         setKafkaTemplate(kafkaTemplate);
-        setItemKeyMapper(DocumentRow::getUuid);
+        setItemKeyMapper(DocumentRow::getExternalReferenceUuid);
         setDelete(false); // not related to the HocsTxaDocumentExtractor delete functionality
         setTimeout(10000); // Milliseconds to wait for callback
         afterPropertiesSet();

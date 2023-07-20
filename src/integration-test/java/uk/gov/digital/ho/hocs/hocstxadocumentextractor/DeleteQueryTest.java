@@ -63,9 +63,9 @@ public class DeleteQueryTest {
             INSERT INTO metadata.document_metadata (uuid, external_reference_uuid, type, pdf_link, status, updated_on, deleted_on)
             VALUES
                 ('00000000-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', timestamp '2023-03-22 12:01:00'),
-                ('00000001-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-15 12:00:00', timestamp '2023-03-15 12:00:00'),
-                ('00000002-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-14 12:00:00', timestamp '2023-03-14 12:00:00'),
-                ('00000003-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-0000000000e1', 'Email', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', timestamp '2023-03-27 12:00:00');
+                ('00000001-aaaa-bbbb-cccc-000000000000', '00000001-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-15 12:00:00', timestamp '2023-03-15 12:00:00'),
+                ('00000002-aaaa-bbbb-cccc-000000000000', '00000002-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-14 12:00:00', timestamp '2023-03-14 12:00:00'),
+                ('00000003-aaaa-bbbb-cccc-000000000000', '00000003-aaaa-bbbb-cccc-0000000000e1', 'Email', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', timestamp '2023-03-27 12:00:00');
             """;
         TestUtils.setUpPostgres(this.jdbcTemplate, insertRecords);
 
@@ -95,9 +95,9 @@ public class DeleteQueryTest {
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
         writer.commitTimestamp(); // required to trigger the predestroy method during the test
 
-        List<String> expectedDocs = Arrays.asList("00000000-aaaa-bbbb-cccc-000000000000",
-                                                  "00000001-aaaa-bbbb-cccc-000000000000",
-                                                  "00000003-aaaa-bbbb-cccc-000000000000");
+        List<String> expectedDocs = Arrays.asList("00000000-aaaa-bbbb-cccc-0000000000a1",
+                                                  "00000001-aaaa-bbbb-cccc-0000000000a1",
+                                                  "00000003-aaaa-bbbb-cccc-0000000000e1");
 
         assertEquals("COMPLETED", jobExecution.getExitStatus().getExitCode());
         List<String> keysConsumed = TestUtils.consumeKafkaMessages(bootstrapServers, deleteTopic, 10);

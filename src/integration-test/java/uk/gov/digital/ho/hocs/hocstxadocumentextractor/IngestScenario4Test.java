@@ -70,11 +70,11 @@ public class IngestScenario4Test {
             INSERT INTO metadata.document_metadata (uuid, external_reference_uuid, type, pdf_link, status, updated_on, deleted_on)
             VALUES
                 ('00000000-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', NULL),
-                ('00000001-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file2.pdf', 'UPLOADED', timestamp '2023-03-22 13:00:00', NULL),
-                ('00000002-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file3.pdf', 'UPLOADED', timestamp '2023-03-22 14:00:00', NULL),
-                ('00000003-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-000000000000', 'ORIGINAL', 'decs-file4.pdf', 'UPLOADED', timestamp '2023-03-22 15:00:00', NULL),
-                ('00000004-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file5.pdf', 'UPLOADED', timestamp '2023-03-22 16:00:00', NULL),
-                ('00000005-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'NONEXISTENT-FILE.pdf', 'UPLOADED', timestamp '2023-03-22 17:00:00', NULL);
+                ('00000001-aaaa-bbbb-cccc-000000000000', '00000001-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file2.pdf', 'UPLOADED', timestamp '2023-03-22 13:00:00', NULL),
+                ('00000002-aaaa-bbbb-cccc-000000000000', '00000002-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file3.pdf', 'UPLOADED', timestamp '2023-03-22 14:00:00', NULL),
+                ('00000003-aaaa-bbbb-cccc-000000000000', '00000003-aaaa-bbbb-cccc-000000000000', 'ORIGINAL', 'decs-file4.pdf', 'UPLOADED', timestamp '2023-03-22 15:00:00', NULL),
+                ('00000004-aaaa-bbbb-cccc-000000000000', '00000004-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file5.pdf', 'UPLOADED', timestamp '2023-03-22 16:00:00', NULL),
+                ('00000005-aaaa-bbbb-cccc-000000000000', '00000005-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'NONEXISTENT-FILE.pdf', 'UPLOADED', timestamp '2023-03-22 17:00:00', NULL);
             """;
         TestUtils.setUpPostgres(this.jdbcTemplate, insertRecords);
 
@@ -106,10 +106,10 @@ public class IngestScenario4Test {
         assertEquals("FAILED", jobExecution.getExitStatus().getExitCode());
         assertEquals("2023-03-22 16:00:00.0", TestUtils.getTimestampFromS3("untrusted-bucket", this.endpointURL, this.deletes));
 
-        List<String> expectedDocs = Arrays.asList("00000000-aaaa-bbbb-cccc-000000000000",
-                                                  "00000001-aaaa-bbbb-cccc-000000000000",
-                                                  "00000002-aaaa-bbbb-cccc-000000000000",
-                                                  "00000004-aaaa-bbbb-cccc-000000000000");
+        List<String> expectedDocs = Arrays.asList("00000000-aaaa-bbbb-cccc-0000000000a1",
+                                                  "00000001-aaaa-bbbb-cccc-0000000000a1",
+                                                  "00000002-aaaa-bbbb-cccc-0000000000a1",
+                                                  "00000004-aaaa-bbbb-cccc-0000000000a1");
 
         List<String> keysConsumed = TestUtils.consumeKafkaMessages(bootstrapServers, ingestTopic, 10);
         assertEquals(4, keysConsumed.size());
