@@ -43,7 +43,8 @@ public class S3TimestampManager {
                        String lastIngest,
                        String lastDelete,
                        boolean deletes) throws URISyntaxException {
-        log.info("Constructing S3TimestampManager to GET/PUT timestamp metadata from/in: " + targetBucket);
+        log.info("Constructing S3TimestampManager to manage timestamps in: " + targetBucket);
+        log.info("S3 endpoint: " + endpointURL);
 
         this.targetBucket = targetBucket;
         try {
@@ -68,7 +69,7 @@ public class S3TimestampManager {
     }
 
     public String getTimestamp() throws IOException {
-        log.info("Attempting to get the last successful collection timestamp...");
+        log.info("Attempting to get the last successful collection timestamp from " + this.targetBucket + "/" + this.metadataFile);
         GetObjectRequest objectRequest = GetObjectRequest
             .builder()
             .key(this.metadataFile)

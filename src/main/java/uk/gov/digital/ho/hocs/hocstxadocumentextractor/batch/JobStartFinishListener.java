@@ -68,11 +68,13 @@ public class JobStartFinishListener implements JobExecutionListener {
         log.info("Runtime Statistics:");
         log.info("Started at " + startTime);
         log.info("Finished at " + endTime);
-        log.info("Number of documents processed was " + readCount);
+        long noOfMinutes = ChronoUnit.MINUTES.between(startTime,endTime);
+        log.info("Number of documents processed was " + readCount + " in approximately " + noOfMinutes + " minutes");
+
         long noOfMillis = ChronoUnit.MILLIS.between(startTime,endTime);
         double noOfSeconds = noOfMillis / 1000.0;
         double docsPerSecond = readCount / noOfSeconds;
-        log.info(String.format("docs/seconds ~ %.2f", docsPerSecond));
+        log.info(String.format("documents/second ~ %.2f", docsPerSecond));
 
         // Notify
         log.info("Sending job outcome notifications...");
