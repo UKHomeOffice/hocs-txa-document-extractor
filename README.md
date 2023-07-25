@@ -5,7 +5,8 @@
 This application serves as an interface between the DECS system and a Text Analytics pipeline.
 
 The purpose of this application is to identify relevant documents for text analytics
-and ingest them for analysis.
+and ingest them for analysis. It is also used to identify documents soft-deleted from
+the DECS system and propagate these downstream.
 
 
 ## Run tests
@@ -42,7 +43,10 @@ Tests, security & quality scans, and docker builds/pushes are run using GitHub a
 are triggered on merge request into the default branch.
 See the `.github/workflows` directory.
 
-Deployments are managed according to the HOCS Deployments Documentation - https://ukhomeoffice.github.io/hocs/deployments/
+Deployments to notprod are implemented by the `.drone.yml` file in this repo.
+
+Deployments to prod namespaces are managed according to the HOCS Deployments
+Documentation - https://ukhomeoffice.github.io/hocs/deployments/
 
 ## Schema Changes
 If the schema of a document (`DocumentRow` class) is going to change in future, please be
