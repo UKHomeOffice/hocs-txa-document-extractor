@@ -41,13 +41,12 @@ public class S3TimestampManagerTest {
         S3TimestampManager timestampManager = new S3TimestampManager("bucket",
             "http://endpoint.url",
             "2023-04-03 10:10:10.0",
-            "",
-            deletes);
+            deletes,
+            "CS");
         assertNotNull(timestampManager.targetBucket);
         assertNotNull(timestampManager.endpointURL);
-        assertNotNull(timestampManager.lastIngest);
-        assertNotNull(timestampManager.lastDelete);
-        assertEquals(timestampManager.metadataFile, "decs/ingests.json");
+        assertNotNull(timestampManager.lastCollection);
+        assertEquals(timestampManager.metadataPath, "decs/cs/ingests.json");
         assertNotNull(timestampManager.s3Client);
     }
 
@@ -61,14 +60,14 @@ public class S3TimestampManagerTest {
             "bucket",
             "some:bad && url",
             "2023-04-03 10:10:10.0",
-            "",
-            deletes));
+            deletes,
+            "CS"));
     }
 
     @Test
     public void getTimestampNoOverrideTest() throws URISyntaxException, IOException {
         /*
-        Test the getTimestamp method uses the timestamp from S3 when an empty lastIngest
+        Test the getTimestamp method uses the timestamp from S3 when an empty lastCollection
         argument is given in the constructor.
          */
 
@@ -77,8 +76,8 @@ public class S3TimestampManagerTest {
         S3TimestampManager timestampManager = new S3TimestampManager("bucket",
             "http://endpoint.url",
             "",
-            "",
-            deletes);
+            deletes,
+            "CS");
         S3Client mockClient = mock(S3Client.class);
         String mockJson = """
             {"lastSuccessfulCollection": "2023-04-13 10:10:10.0"}""";
@@ -99,15 +98,15 @@ public class S3TimestampManagerTest {
     public void getTimestampWithOverrideTest() throws URISyntaxException, IOException {
         /*
         Test the getTimestamp method overrides the timestamp from s3 when a timestamp is
-        given in the lastIngest constructor argument.
+        given in the lastCollection constructor argument.
          */
         // Mock the S3 response to a predictable timestamp value
         boolean deletes = false;
         S3TimestampManager timestampManager = new S3TimestampManager("bucket",
             "http://endpoint.url",
             "2023-01-01 00:00:00",
-            "",
-            deletes);
+            deletes,
+            "CS");
         S3Client mockClient = mock(S3Client.class);
         String mockJson = """
             {"lastSuccessfulCollection": "2023-04-13 10:10:10.0"}""";
@@ -134,8 +133,8 @@ public class S3TimestampManagerTest {
         S3TimestampManager timestampManager = new S3TimestampManager("bucket",
             "http://endpoint.url",
             "2023-01-01 00:00:00",
-            "",
-            deletes);
+            deletes,
+            "CS");
         S3Client mockClient = mock(S3Client.class);
         PutObjectResponse mockPutResponse = mock(PutObjectResponse.class);
         SdkHttpResponse mockSdkResponse = mock(SdkHttpResponse.class);
@@ -164,8 +163,8 @@ public class S3TimestampManagerTest {
         S3TimestampManager timestampManager = new S3TimestampManager("bucket",
             "http://endpoint.url",
             "2023-01-01 00:00:00",
-            "",
-            deletes);
+            deletes,
+            "CS");
         S3Client mockClient = mock(S3Client.class);
         PutObjectResponse mockPutResponse = mock(PutObjectResponse.class);
         SdkHttpResponse mockSdkResponse = mock(SdkHttpResponse.class);
@@ -195,8 +194,8 @@ public class S3TimestampManagerTest {
         S3TimestampManager timestampManager = new S3TimestampManager("bucket",
             "http://endpoint.url",
             "2023-01-01 00:00:00",
-            "",
-            deletes);
+            deletes,
+            "CS");
 
         String mockJson = """
             {"lastSuccessfulCollection": "2023-04-13 10:10:10.0"}""";
@@ -222,8 +221,8 @@ public class S3TimestampManagerTest {
         S3TimestampManager timestampManager = new S3TimestampManager("bucket",
             "http://endpoint.url",
             "2023-01-01 00:00:00",
-            "",
-            deletes);
+            deletes,
+            "CS");
 
         String malformedJson = """
             {"lastSuccessfulCollection 2023-04-13 10:10:10.0"}""";
@@ -247,8 +246,8 @@ public class S3TimestampManagerTest {
         S3TimestampManager timestampManager = new S3TimestampManager("bucket",
             "http://endpoint.url",
             "2023-01-01 00:00:00",
-            "",
-            deletes);
+            deletes,
+            "CS");
 
         Map<String, String> input = new HashMap<>();
         input.put("lastSuccessfulCollection", "2023-04-13 10:10:10.0");

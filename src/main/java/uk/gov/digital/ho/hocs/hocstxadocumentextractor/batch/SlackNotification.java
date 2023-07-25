@@ -18,21 +18,24 @@ public class SlackNotification {
     private Map<String, String> slackURLMap;
     protected Slack slack;
     protected boolean deletes;
+    protected String hocsSystem;
 
-    SlackNotification(Map<String, String> slackURLMap, boolean deletes) {
+    SlackNotification(Map<String, String> slackURLMap, boolean deletes, String hocsSystem) {
         this.slackURLMap = slackURLMap;
         this.deletes = deletes;
         this.slack = Slack.getInstance();
+        this.hocsSystem = hocsSystem;
     }
 
     public String craftSuccessMessage(long readCount, double noOfSeconds) {
         String mode = this.deletes ? "Collection for Delete" : "Collection for Ingest";
         String successTemplate = """
-            DECS -> TXA $mode Successful.
+            DECS -> TXA $mode Successful ($hocsSystem).
             $readCount documents ingested in $noOfSeconds seconds.""";
 
         final String successPayload = successTemplate
             .replace("$mode", mode)
+            .replace("$hocsSystem", this.hocsSystem)
             .replace("$readCount", "" + readCount)
             .replace("$noOfSeconds", "" + noOfSeconds);
         return successPayload;
@@ -41,11 +44,12 @@ public class SlackNotification {
     public String craftFailureMessage(String outcome) {
         String mode = this.deletes ? "Collection for Delete" : "Collection for Ingest";
         String failureTemplate = """
-            DECS -> TXA $mode Failed.
+            DECS -> TXA $mode Failed ($hocsSystem).
             Outcome was $outcome.""";
 
         final String failurePayload = failureTemplate
             .replace("$mode", mode)
+            .replace("$hocsSystem", this.hocsSystem)
             .replace("$outcome", outcome);
         return failurePayload;
     }
@@ -53,12 +57,13 @@ public class SlackNotification {
     public String craftTimestampMessage(boolean success, String lastCheckpointTimestamp) {
         String mode = this.deletes ? "for deletes" : "for ingests";
         String timestampTemplate = """
-            lastSuccessfulCollection $mode = $timestamp
+            lastSuccessfulCollection $mode = $timestamp ($hocsSystem)
             timestamp commit successful? $success.
             """;
 
         final String timestampPayload = timestampTemplate
             .replace("$mode", mode)
+            .replace("$hocsSystem", this.hocsSystem)
             .replace("$timestamp", lastCheckpointTimestamp)
             .replace("$success", "" + success); // converts bool to string
         return timestampPayload;
@@ -90,7 +95,7 @@ public class SlackNotification {
         int responseCode = response.getCode();
         if (responseCode == 200) {
             log.info("Notification to " + channelSelector + " sent successfully");
-        } else { // do not throw an exception if the slack notification fails
+        } else { // do not throw an exception if the Slack notification fails
             log.error("Notification to " + channelSelector + " failed");
             log.error("Response code was " + responseCode);
             log.error(response.getBody());

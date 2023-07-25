@@ -30,14 +30,14 @@ public class BatchConfiguration {
     private @Value("${document-metadata.metadata_table}") String metadataTable;
     private @Value("${document-metadata.fetch_size}") Integer fetchSize;
     private @Value("${document-metadata.chunk_size}") Integer chunkSize;
-    private @Value("${document-metadata.last_ingest}") String lastIngest;
-    private @Value("${document-metadata.last_delete}") String lastDelete;
+    private @Value("${document-metadata.last_collection}") String lastCollection;
     private @Value("${s3.source_bucket}") String sourceBucket;
     private @Value("${s3.target_bucket}") String targetBucket;
     private @Value("${s3.endpoint_url}") String endpointURL;
     private @Value("${slack.decs_channel}") String decsSlackURL;
     private @Value("${slack.txa_channel}") String txaSlackURL;
     private @Value("${mode.delete}") boolean deletes;
+    private @Value("${mode.hocs_system}") String hocsSystem;
 
     @Bean
     public SlackNotification slackNotification() {
@@ -47,7 +47,7 @@ public class BatchConfiguration {
         Map<String, String> slackURLMap = new HashMap<String, String>();
         slackURLMap.put("txa", txaSlackURL);
         slackURLMap.put("decs", decsSlackURL);
-        return new SlackNotification(slackURLMap, deletes);
+        return new SlackNotification(slackURLMap, deletes, hocsSystem);
     }
 
     @Bean
@@ -57,9 +57,9 @@ public class BatchConfiguration {
          */
         return new JobStartFinishListener(targetBucket,
             endpointURL,
-            lastIngest,
-            lastDelete,
+            lastCollection,
             deletes,
+            hocsSystem,
             slackNotification);
     }
 
@@ -100,7 +100,10 @@ public class BatchConfiguration {
         /*
         For publishing documents to Kafka
          */
-        return new TxaKafkaItemWriter(targetBucket, endpointURL, txaSlackURL, decsSlackURL, deletes, kafkaTemplate);
+        Map<String, String> slackURLMap = new HashMap<String, String>();
+        slackURLMap.put("txa", txaSlackURL);
+        slackURLMap.put("decs", decsSlackURL);
+        return new TxaKafkaItemWriter(targetBucket, endpointURL, slackURLMap, deletes, hocsSystem, kafkaTemplate);
     }
 
     @Bean
