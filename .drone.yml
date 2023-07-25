@@ -1,0 +1,40 @@
+---
+kind: pipeline
+type: kubernetes
+name: deploy-notprod
+
+#trigger:
+#  event:
+#    - tag
+#  branch:
+#    - main
+
+trigger:
+  branch:
+    - revisions
+  event:
+    - push
+
+steps:
+  - name: git-checkout
+    image: quay.io/ukhomeofficedigital/hocs-helm-kubectl:1.1.1
+    commands:
+      - git fetch --tags
+      - git checkout ${DRONE_TAG}
+      - git submodule update --init --recursive
+
+  - name: deploy-hocs-txa-extractor-notprod
+    image: quay.io/ukhomeofficedigital/hocs-helm-kubectl:1.1.1
+    environment:
+      CHART_NAME: hocs-txa-document-extractor
+      CHART_VERSION: ^1.0.0
+      KUBE_CLUSTER: acp-notprod
+      KUBE_NAMESPACE: cs-txa-notprod
+      KUBE_SERVER: https://kube-api-notprod.notprod.acp.homeoffice.gov.uk
+      KUBE_TOKEN:
+        from_secret: CS_TXA_NOTPROD_TOKEN
+      VERSION: ${DRONE_TAG}
+    commands:
+      - ./ci/helm/helm-chart-deploy.sh --values ./helm/notprod.yaml
+    depends_on:
+      - git-checkout

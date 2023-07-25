@@ -1,0 +1,18 @@
+---
+jobs:
+  cs-ingests:
+    enabled: true
+    schedule: '5 8 * * *'
+    imageTag: 2.0.0
+  cs-deletes:
+    enabled: true
+    schedule: '5 8 * * *'
+    imageTag: 2.0.0
+  wcs-ingests:
+    enabled: true
+    schedule: '5 8 * * *'
+    imageTag: 2.0.0
+  wcs-deletes:
+    enabled: true
+    schedule: '5 8 * * *'
+    imageTag: 2.0.0'
