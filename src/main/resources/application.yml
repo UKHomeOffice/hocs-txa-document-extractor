@@ -5,6 +5,8 @@ info:
 mode:
   # set to true to collect documents for deletion instead of ingestion
   delete: ${MODE_DELETE:false}
+  # CS or WCS, affects notification content and timestamp used on target s3 bucket
+  hocs_system: ${MODE_HOCS_SYSTEM:CS}
 
 document-metadata:
   # Standard settings to configure PGDataSource
@@ -22,8 +24,7 @@ document-metadata:
   chunk_size: ${METADATA_CHUNK_SIZE:2}
   # Timestamps are expected as strings in format "YYYY-MM-DD HH:mm:SS"
   # No timestamp => values are obtained from the target s3 bucket
-  last_ingest: ${METADATA_LAST_INGEST:}
-  last_delete: ${METADATA_LAST_DELETE:}
+  last_collection: ${METADATA_LAST_COLLECTION:}
 
 s3:
   # Where documents are copied from

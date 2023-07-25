@@ -24,12 +24,12 @@ public class SlackNotificationTest {
         Map<String, String> slackURLMap = new HashMap<String, String>();
         boolean deletes = false;
         slackURLMap.put("txa", "txaSlackURL");
-        SlackNotification slackNotification = new SlackNotification(slackURLMap, deletes);
+        SlackNotification slackNotification = new SlackNotification(slackURLMap, deletes, "CS");
 
         long readCount = 5;
         double noOfSeconds = 0.555;
         String expected = """
-            DECS -> TXA Collection for Ingest Successful.
+            DECS -> TXA Collection for Ingest Successful (CS).
             5 documents ingested in 0.555 seconds.""";
 
         String actual = slackNotification.craftSuccessMessage(readCount, noOfSeconds);
@@ -44,11 +44,11 @@ public class SlackNotificationTest {
         Map<String, String> slackURLMap = new HashMap<String, String>();
         boolean deletes = false;
         slackURLMap.put("txa", "txaSlackURL");
-        SlackNotification slackNotification = new SlackNotification(slackURLMap, deletes);
+        SlackNotification slackNotification = new SlackNotification(slackURLMap, deletes, "CS");
 
         String outcome = "FAILED";
         String expected = """
-            DECS -> TXA Collection for Ingest Failed.
+            DECS -> TXA Collection for Ingest Failed (CS).
             Outcome was FAILED.""";
 
         String actual = slackNotification.craftFailureMessage(outcome);
@@ -63,12 +63,12 @@ public class SlackNotificationTest {
         Map<String, String> slackURLMap = new HashMap<String, String>();
         boolean deletes = false;
         slackURLMap.put("txa", "txaSlackURL");
-        SlackNotification slackNotification = new SlackNotification(slackURLMap, deletes);
+        SlackNotification slackNotification = new SlackNotification(slackURLMap, deletes, "WCS");
 
         boolean success = true;
         String timestamp = "2023-03-22 11:59:59.0";
         String expected = """
-            lastSuccessfulCollection for ingests = 2023-03-22 11:59:59.0
+            lastSuccessfulCollection for ingests = 2023-03-22 11:59:59.0 (WCS)
             timestamp commit successful? true.
             """;
 
@@ -83,7 +83,7 @@ public class SlackNotificationTest {
         Map<String, String> slackURLMap = new HashMap<String, String>();
         boolean deletes = false;
         slackURLMap.put("txa", "txaSlackURL");
-        SlackNotification slackNotification = new SlackNotification(slackURLMap, deletes);
+        SlackNotification slackNotification = new SlackNotification(slackURLMap, deletes, "CS");
 
         String expected = "txaSlackURL";
         String actual = slackNotification.getWebhookURL("txa");
@@ -98,7 +98,7 @@ public class SlackNotificationTest {
         Map<String, String> slackURLMap = new HashMap<String, String>();
         boolean deletes = false;
         slackURLMap.put("txa", "");
-        SlackNotification slackNotification = new SlackNotification(slackURLMap, deletes);
+        SlackNotification slackNotification = new SlackNotification(slackURLMap, deletes, "CS");
 
         int expected = 400;
         int responseCode = slackNotification.publishMessage("any message", "txa");
@@ -114,7 +114,7 @@ public class SlackNotificationTest {
         Map<String, String> slackURLMap = new HashMap<String, String>();
         boolean deletes = false;
         slackURLMap.put("txa", "txaSlackURL");
-        SlackNotification slackNotification = new SlackNotification(slackURLMap, deletes);
+        SlackNotification slackNotification = new SlackNotification(slackURLMap, deletes, "CS");
 
         int expected = 400;
         int responseCode = slackNotification.publishMessage("any message", "NONEXISTENT_KEY");
@@ -129,7 +129,7 @@ public class SlackNotificationTest {
         Map<String, String> slackURLMap = new HashMap<String, String>();
         boolean deletes = false;
         slackURLMap.put("txa", "txaSlackURL");
-        SlackNotification slackNotification = new SlackNotification(slackURLMap, deletes);
+        SlackNotification slackNotification = new SlackNotification(slackURLMap, deletes, "CS");
 
         Slack mockSlack = mock(Slack.class);
         when(mockSlack.send(any(String.class), any(Payload.class))).thenThrow(IOException.class);
@@ -148,7 +148,7 @@ public class SlackNotificationTest {
         Map<String, String> slackURLMap = new HashMap<String, String>();
         boolean deletes = false;
         slackURLMap.put("txa", "txaSlackURL");
-        SlackNotification slackNotification = new SlackNotification(slackURLMap, deletes);
+        SlackNotification slackNotification = new SlackNotification(slackURLMap, deletes, "CS");
 
         Slack mockSlack = mock(Slack.class);
         WebhookResponse mockWebhookResponse = mock(WebhookResponse.class);

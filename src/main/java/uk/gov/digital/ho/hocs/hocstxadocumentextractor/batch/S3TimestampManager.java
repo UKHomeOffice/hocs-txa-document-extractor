@@ -31,18 +31,17 @@ public class S3TimestampManager {
 
     protected String targetBucket;
     protected URI endpointURL;
-    protected String lastIngest;
-    protected String lastDelete;
+    protected String lastCollection;
     protected boolean deletes;
-    protected String metadataFile;
+    protected String metadataPath;
     protected S3Client s3Client;
     protected Map<String, String> metadataJson;
 
     S3TimestampManager(String targetBucket,
                        String endpointURL,
-                       String lastIngest,
-                       String lastDelete,
-                       boolean deletes) throws URISyntaxException {
+                       String lastCollection,
+                       boolean deletes,
+                       String hocsSystem) throws URISyntaxException {
         log.info("Constructing S3TimestampManager to manage timestamps in: " + targetBucket);
         log.info("S3 endpoint: " + endpointURL);
 
@@ -53,10 +52,11 @@ public class S3TimestampManager {
             log.error(e.toString());
             throw e;
         }
-        this.lastIngest = lastIngest;
-        this.lastDelete = lastDelete;
+        this.lastCollection = lastCollection;
         this.deletes = deletes;
-        this.metadataFile = deletes ? "decs/deletes.json" : "decs/ingests.json"; // delete and ingest timestamps are tracked separately.
+        String metadataFile = deletes ? "deletes.json" : "ingests.json";
+        // delete and ingest timestamps for cs and wcs are all tracked independently
+        this.metadataPath = String.format("decs/%s/%s", hocsSystem.toLowerCase(), metadataFile);
 
         DefaultCredentialsProvider credentialsProvider = DefaultCredentialsProvider.create();
         Region region = Region.EU_WEST_2;
@@ -69,10 +69,10 @@ public class S3TimestampManager {
     }
 
     public String getTimestamp() throws IOException {
-        log.info("Attempting to get the last successful collection timestamp from " + this.targetBucket + "/" + this.metadataFile);
+        log.info("Attempting to get the last successful collection timestamp from " + this.targetBucket + "/" + this.metadataPath);
         GetObjectRequest objectRequest = GetObjectRequest
             .builder()
-            .key(this.metadataFile)
+            .key(this.metadataPath)
             .bucket(this.targetBucket)
             .build();
         ResponseInputStream fullObject = this.s3Client.getObject(objectRequest);
@@ -82,28 +82,16 @@ public class S3TimestampManager {
         log.info("lastSuccessfulCollection is: " + result);
         this.metadataJson = metadata;
 
-        if (this.lastIngest != "" && !deletes) {
+        if (this.lastCollection != "") {
             /*
             This occurs after loading the metadata.json from S3 even if the env var is set so that
             the hashmap can be constructed from the real metadata.json file. Only then is the value
             in the hashmap overwritten with the value from the environment variable.
              */
-            log.info("lastSuccessfulCollection for INGEST is set => Overriding S3 timestamp with local value");
-            log.info("lastSuccessfulCollection=" + this.lastIngest);
-            metadata.put("lastSuccessfulCollection", this.lastIngest);
-            return this.lastIngest;
-        }
-
-        if (this.lastDelete != "" && deletes) {
-            /*
-            This occurs after loading the metadata.json from S3 even if the env var is set so that
-            the hashmap can be constructed from the real metadata.json file. Only then is the value
-            in the hashmap overwritten with the value from the environment variable.
-             */
-            log.info("lastSuccessfulCollection for DELETES is set => Overriding S3 timestamp with local value");
-            log.info("lastSuccessfulCollection=" + this.lastIngest);
-            metadata.put("lastSuccessfulCollection", this.lastIngest);
-            return this.lastDelete;
+            log.info("lastSuccessfulCollection is set to be overridden => Overriding S3 timestamp with local value");
+            log.info("lastSuccessfulCollection=" + this.lastCollection);
+            metadata.put("lastSuccessfulCollection", this.lastCollection);
+            return this.lastCollection;
         }
 
         return result;
@@ -115,7 +103,7 @@ public class S3TimestampManager {
 
         PutObjectRequest objectRequest = PutObjectRequest.builder()
             .bucket(this.targetBucket)
-            .key(this.metadataFile)
+            .key(this.metadataPath)
             .acl(ObjectCannedACL.BUCKET_OWNER_FULL_CONTROL)  // required for owner of target bucket to control the file.
             .build();
 
