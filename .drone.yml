@@ -3,17 +3,9 @@ kind: pipeline
 type: kubernetes
 name: deploy-notprod
 
-#trigger:
-#  event:
-#    - tag
-#  branch:
-#    - main
-
 trigger:
-  branch:
-    - revisions
   event:
-    - push
+    - tag
 
 steps:
   - name: git-checkout
