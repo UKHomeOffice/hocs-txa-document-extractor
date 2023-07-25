@@ -15,4 +15,4 @@ jobs:
   wcs-deletes:
     enabled: true
     schedule: '5 8 * * *'
-    imageTag: 2.0.0'
+    imageTag: 2.0.0
