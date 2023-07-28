@@ -13,7 +13,6 @@ import uk.gov.digital.ho.hocs.hocstxadocumentextractor.documents.DocumentRow;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Map;
 
 public class TxaKafkaItemWriter extends KafkaItemWriter<String, DocumentRow> {
@@ -58,7 +57,6 @@ public class TxaKafkaItemWriter extends KafkaItemWriter<String, DocumentRow> {
         String checkpointTimestamp = null;
         for (DocumentRow doc : doc_list) {
             docTimestamp = this.deletes ? doc.getDeletedOn().toString() : doc.getUpdatedOn().toString();
-            doc.setPdfLink("decs/" + doc.getPdfLink());  // S3ItemProcessor adds a prefix to the pdfLink when writing
             log.info("Publishing event for document " + doc.getExternalReferenceUuid() + " with timestamp=" + docTimestamp);
             String key = itemKeyMapper.convert(doc);
             writeKeyValue(key, doc);

@@ -84,7 +84,8 @@ public class BatchConfiguration {
             metadataSchema,
             metadataTable,
             fetchSize,
-            deletes);
+            deletes,
+            hocsSystem);
     }
 
     @Bean

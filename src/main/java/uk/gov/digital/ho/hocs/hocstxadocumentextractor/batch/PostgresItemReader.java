@@ -17,8 +17,7 @@ public class PostgresItemReader extends JdbcCursorItemReader<DocumentRow> {
     This class defines the rules (SQL query) to determine what documents to
     collect when the Job executes.
      */
-    private static final Logger log = LoggerFactory.getLogger(
-        PostgresItemReader.class);
+    private static final Logger log = LoggerFactory.getLogger(PostgresItemReader.class);
     public String lastSuccessfulCollection;
     public DataSource dataSource;
     public String metadataSchema;
@@ -30,7 +29,8 @@ public class PostgresItemReader extends JdbcCursorItemReader<DocumentRow> {
                               final String metadataSchema,
                               final String metadataTable,
                               final int fetchSize,
-                              final boolean deletes) {
+                              final boolean deletes,
+                              final String hocsSystem) {
         log.info("Constructing PostgresItemReader");
         this.dataSource = dataSource;
         this.metadataSchema = metadataSchema;
@@ -43,7 +43,7 @@ public class PostgresItemReader extends JdbcCursorItemReader<DocumentRow> {
         setFetchSize(this.fetchSize);
         setName("documentReader");
         setSql(temp_query);
-        setRowMapper(new DocumentRowMapper());
+        setRowMapper(new DocumentRowMapper(hocsSystem));
     }
 
     @BeforeStep

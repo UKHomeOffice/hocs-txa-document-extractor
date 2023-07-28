@@ -61,7 +61,7 @@ public class S3ItemProcessor implements ItemProcessor<DocumentRow, DocumentRow> 
     @Override
     public DocumentRow process(final DocumentRow doc) throws S3Exception, JsonProcessingException {
         final String sourceKey = doc.getPdfLink();
-        final String destinationKey = "decs/" + sourceKey;  // add prefix to segregate data in destination bucket
+        final String destinationKey = doc.getDestinationKey();
         // don't attempt to replace possible existing .pdf extension to avoid handling cases
         // where it might not exist
         final String jsonKey = destinationKey + ".json";

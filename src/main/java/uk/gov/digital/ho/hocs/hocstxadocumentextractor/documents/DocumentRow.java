@@ -20,4 +20,6 @@ public class DocumentRow {
     private String status;
     private Timestamp updatedOn;
     private Timestamp deletedOn;
+    private String destinationKey;
+    private String source;
 }

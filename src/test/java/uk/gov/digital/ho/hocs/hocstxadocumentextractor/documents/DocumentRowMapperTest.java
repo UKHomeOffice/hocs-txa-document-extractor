@@ -22,7 +22,7 @@ public class DocumentRowMapperTest {
     @Test
     void rowMapTest() throws SQLException {
         // given a RowMapper
-        DocumentRowMapper docMap = new DocumentRowMapper();
+        DocumentRowMapper docMap = new DocumentRowMapper("cs");
         // And some values for a DocumentRow
         String uuid = "00000000-aaaa-bbbb-cccc-000000000000";
         String externalReferenceUuid = "00000000-aaaa-bbbb-cccc-0000000000a1";
@@ -54,6 +54,35 @@ public class DocumentRowMapperTest {
         assertEquals(doc.getStatus(), status);
         assertEquals(doc.getUpdatedOn(), updatedOn);
         assertEquals(doc.getDeletedOn(), deletedOn);
+        assertEquals(doc.getDestinationKey(), "decs/cs/year=2007/month=09/day=23/some-file.pdf");
+        assertEquals(doc.getSource(), "cs");
+    }
+
+    @Test
+    void computeDestinationKeyTest() {
+        /*
+        Test that the destination key is computed correctly
+         */
+        DocumentRowMapper docMap = new DocumentRowMapper("cs");
+        java.sql.Timestamp timestamp = java.sql.Timestamp.valueOf("2023-12-12 10:10:10.0");
+        String pdfLink = "a1-b2-c3/d4-e5-f6.pdf";
+        String result = docMap.computeDestinationKey(timestamp, pdfLink);
+        String expected = "decs/cs/year=2023/month=12/day=12/a1-b2-c3/d4-e5-f6.pdf";
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void computeDestinationKeyZeroPaddingTest() {
+        /*
+        Test that the destination key zero-pads singe digit months and days
+         */
+        DocumentRowMapper docMap = new DocumentRowMapper("wcs");
+        java.sql.Timestamp timestamp = java.sql.Timestamp.valueOf("2023-1-9 10:10:10.0");
+        String pdfLink = "a1-b2-c3/d4-e5-f6.pdf";
+        String result = docMap.computeDestinationKey(timestamp, pdfLink);
+        String expected = "decs/wcs/year=2023/month=01/day=09/a1-b2-c3/d4-e5-f6.pdf";
+        assertEquals(expected, result);
+
     }
 
 }
