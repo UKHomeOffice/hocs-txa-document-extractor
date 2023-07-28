@@ -24,6 +24,8 @@ public class DocumentRowTest {
         String status = "UPLOADED";
         Timestamp updatedOn = Timestamp.valueOf("2007-09-23 10:10:10.0");
         Timestamp deletedOn = Timestamp.valueOf("2008-09-23 10:10:10.0");
+        String destinationKey = "decs/cs/some/path.pdf";
+        String source = "cs";
 
         doc.setUuid(uuid);
         doc.setExternalReferenceUuid(externalReferenceUuid);
@@ -33,6 +35,8 @@ public class DocumentRowTest {
         doc.setStatus(status);
         doc.setUpdatedOn(updatedOn);
         doc.setDeletedOn(deletedOn);
+        doc.setDestinationKey(destinationKey);
+        doc.setSource(source);
 
         // then they are set correctly
         assertEquals(doc.getUuid(), uuid);
@@ -43,6 +47,8 @@ public class DocumentRowTest {
         assertEquals(doc.getStatus(), status);
         assertEquals(doc.getUpdatedOn(), updatedOn);
         assertEquals(doc.getDeletedOn(), deletedOn);
+        assertEquals(doc.getDestinationKey(), destinationKey);
+        assertEquals(doc.getSource(), source);
     }
 
     @Test
@@ -59,6 +65,8 @@ public class DocumentRowTest {
         String status = "UPLOADED";
         Timestamp updatedOn = Timestamp.valueOf("2007-09-23 10:10:10.0");
         Timestamp deletedOn = Timestamp.valueOf("2008-09-23 10:10:10.0");
+        String destinationKey = "decs/cs/some/path.pdf";
+        String source = "wcs";
 
         doc.setUuid(uuid);
         doc.setExternalReferenceUuid(externalReferenceUuid);
@@ -68,6 +76,8 @@ public class DocumentRowTest {
         doc.setStatus(status);
         doc.setUpdatedOn(updatedOn);
         doc.setDeletedOn(deletedOn);
+        doc.setDestinationKey(destinationKey);
+        doc.setSource(source);
 
         // and then gotten
         String actualUuid = doc.getUuid();
@@ -78,6 +88,8 @@ public class DocumentRowTest {
         String actualStatus = doc.getStatus();
         Timestamp actualUpdatedOn = doc.getUpdatedOn();
         Timestamp actualDeletedOn = doc.getDeletedOn();
+        String actualDestinationKey = doc.getDestinationKey();
+        String actualSource = doc.getSource();
 
         // then they are as expected
         assertEquals(actualUuid, uuid);
@@ -88,5 +100,7 @@ public class DocumentRowTest {
         assertEquals(actualStatus, status);
         assertEquals(actualUpdatedOn, updatedOn);
         assertEquals(actualDeletedOn, deletedOn);
+        assertEquals(actualDestinationKey, destinationKey);
+        assertEquals(actualSource, source);
     }
 }
