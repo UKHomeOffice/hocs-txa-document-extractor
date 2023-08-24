@@ -46,7 +46,7 @@ dependencies {
     implementation 'org.springframework.kafka:spring-kafka:3.0.4'
     testImplementation 'org.mockito:mockito-inline:5.2.0'
     testImplementation 'org.springframework.boot:spring-boot-starter-test:3.0.4'
-    testImplementation 'org.springframework.batch:spring-batch-test:5.0.0'
+    testImplementation 'org.springframework.batch:spring-batch-test:5.0.3'
     testImplementation 'software.amazon.awssdk:s3-transfer-manager'
     testImplementation 'software.amazon.awssdk:aws-crt-client'
 }
