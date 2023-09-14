@@ -35,7 +35,7 @@ public class DocumentRowMapper implements RowMapper<DocumentRow>{
         document.setUpdatedOn(rs.getTimestamp("updated_on"));
         document.setDeletedOn(rs.getTimestamp("deleted_on"));
 
-        String destinationKey = computeDestinationKey(document.getUpdatedOn(), document.getPdfLink());
+        String destinationKey = computeDestinationKey(document.getUuid(), document.getExternalReferenceUuid(), document.getUpdatedOn());
         document.setDestinationKey(destinationKey);
 
         document.setSource(this.hocsSystem);
@@ -43,7 +43,7 @@ public class DocumentRowMapper implements RowMapper<DocumentRow>{
         return document;
     }
 
-    public String computeDestinationKey(Timestamp updatedOn, String pdfLink) {
+    public String computeDestinationKey(String uuid, String extRefUuid, Timestamp updatedOn) {
         /*
         Craft the path where objects will be written to in the destination S3 bucket.
 
@@ -53,10 +53,11 @@ public class DocumentRowMapper implements RowMapper<DocumentRow>{
         String year = "year=" + dateTime.format(yearFormatter);
         String month = "month=" + dateTime.format(monthFormatter);
         String day = "day=" + dateTime.format(dayFormatter);
+        String uuidWithExtension = uuid + ".pdf";
 
         StringJoiner joiner = new StringJoiner("/");
-        // example destinationKey: decs/cs/year=2023/month=07/day=28/pdfLink
-        joiner.add("decs").add(this.hocsSystem).add(year).add(month).add(day).add(pdfLink);
+        // example destinationKey: decs/cs/year=2023/month=07/day=28/externalReferenceUuid/uuid.pdf
+        joiner.add("decs").add(this.hocsSystem).add(year).add(month).add(day).add(extRefUuid).add(uuidWithExtension);
         return joiner.toString();
     }
 }
