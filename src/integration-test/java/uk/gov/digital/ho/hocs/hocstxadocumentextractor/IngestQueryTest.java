@@ -60,23 +60,24 @@ public class IngestQueryTest {
     void setUp() throws Exception {
         log.info("Test setUp");
         String insertRecords = """
-            INSERT INTO metadata.document_metadata (uuid, external_reference_uuid, type, pdf_link, status, updated_on, deleted_on)
+            INSERT INTO metadata.document_metadata (uuid, external_reference_uuid, type, pdf_link, status, updated_on, deleted, deleted_on)
             VALUES
-                ('00000000-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', NULL),
-                ('00000001-aaaa-bbbb-cccc-000000000000', '00000001-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file1.pdf', 'NOTUPLOADED', timestamp '2023-03-22 12:00:00', NULL),
-                ('00000002-aaaa-bbbb-cccc-000000000000', '00000002-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', NULL, 'UPLOADED', timestamp '2023-03-22 12:00:00', NULL),
-                ('00000003-aaaa-bbbb-cccc-000000000000', '00000003-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', timestamp '2023-03-22 12:01:00'),
-                ('00000004-aaaa-bbbb-cccc-000000000000', '00000004-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 11:59:59', NULL),
-                ('00000005-aaaa-bbbb-cccc-000000000000', '00000005-aaaa-bbbb-cccc-0000000000a1', 'OTHERTYPE', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', NULL),
-                ('00000006-aaaa-bbbb-cccc-000000000000', '00000006-aaaa-bbbb-cccc-0000000000a2', 'CONTRIBUTION', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', NULL),
-                ('00000007-aaaa-bbbb-cccc-000000000000', '00000007-aaaa-bbbb-cccc-0000000000a3', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', NULL),
-                ('00000008-aaaa-bbbb-cccc-000000000000', '00000008-aaaa-bbbb-cccc-0000000000a4', 'Original Complaint', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', NULL),
-                ('00000009-aaaa-bbbb-cccc-000000000000', '00000009-aaaa-bbbb-cccc-0000000000a5', 'Contribution Response', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', NULL),
-                ('00000010-aaaa-bbbb-cccc-000000000000', '00000010-aaaa-bbbb-cccc-0000000000a6', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', NULL),
-                ('00000011-aaaa-bbbb-cccc-000000000000', '00000011-aaaa-bbbb-cccc-0000000000c5', 'Complaint leaflet', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', NULL),
-                ('00000012-aaaa-bbbb-cccc-000000000000', '00000012-aaaa-bbbb-cccc-0000000000c7', 'Original complaint', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', NULL),
-                ('00000013-aaaa-bbbb-cccc-000000000000', '00000013-aaaa-bbbb-cccc-0000000000d1', 'Initial Correspondence', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', NULL),
-                ('00000014-aaaa-bbbb-cccc-000000000000', '00000014-aaaa-bbbb-cccc-0000000000ff', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', NULL);
+                ('00000000-aaaa-bbbb-cccc-000000000000', '00000000-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', 'False', NULL),
+                ('00000001-aaaa-bbbb-cccc-000000000000', '00000001-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file1.pdf', 'NOTUPLOADED', timestamp '2023-03-22 12:00:00', 'False', NULL),
+                ('00000002-aaaa-bbbb-cccc-000000000000', '00000002-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', NULL, 'UPLOADED', timestamp '2023-03-22 12:00:00', 'False', NULL),
+                ('00000003-aaaa-bbbb-cccc-000000000000', '00000003-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', 'True', timestamp '2023-03-22 12:01:00'),
+                ('00000004-aaaa-bbbb-cccc-000000000000', '00000004-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 11:59:59', 'False', NULL),
+                ('00000005-aaaa-bbbb-cccc-000000000000', '00000005-aaaa-bbbb-cccc-0000000000a1', 'OTHERTYPE', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', 'False', NULL),
+                ('00000006-aaaa-bbbb-cccc-000000000000', '00000006-aaaa-bbbb-cccc-0000000000a2', 'CONTRIBUTION', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', 'False', NULL),
+                ('00000007-aaaa-bbbb-cccc-000000000000', '00000007-aaaa-bbbb-cccc-0000000000a3', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', 'False', NULL),
+                ('00000008-aaaa-bbbb-cccc-000000000000', '00000008-aaaa-bbbb-cccc-0000000000a4', 'Original Complaint', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', 'False', NULL),
+                ('00000009-aaaa-bbbb-cccc-000000000000', '00000009-aaaa-bbbb-cccc-0000000000a5', 'Contribution Response', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', 'False', NULL),
+                ('00000010-aaaa-bbbb-cccc-000000000000', '00000010-aaaa-bbbb-cccc-0000000000a6', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', 'False', NULL),
+                ('00000011-aaaa-bbbb-cccc-000000000000', '00000011-aaaa-bbbb-cccc-0000000000c5', 'Complaint leaflet', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', 'False', NULL),
+                ('00000012-aaaa-bbbb-cccc-000000000000', '00000012-aaaa-bbbb-cccc-0000000000c7', 'Original complaint', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', 'False', NULL),
+                ('00000013-aaaa-bbbb-cccc-000000000000', '00000013-aaaa-bbbb-cccc-0000000000d1', 'Initial Correspondence', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', 'False', NULL),
+                ('00000014-aaaa-bbbb-cccc-000000000000', '00000014-aaaa-bbbb-cccc-0000000000ff', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', 'False', NULL),
+                ('00000015-aaaa-bbbb-cccc-000000000000', '00000015-aaaa-bbbb-cccc-0000000000a1', 'ORIGINAL', 'decs-file1.pdf', 'UPLOADED', timestamp '2023-03-22 12:00:00', 'True', NULL);
             """;
         TestUtils.setUpPostgres(this.jdbcTemplate, insertRecords);
 

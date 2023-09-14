@@ -103,6 +103,7 @@ public class PostgresItemReader extends JdbcCursorItemReader<DocumentRow> {
                     status in ('UPLOADED')
                     AND pdf_link IS NOT NULL
                     AND deleted_on IS NULL
+                    AND deleted != True
                     AND updated_on > '$timestamp'::timestamp
             )
             SELECT
@@ -161,6 +162,7 @@ public class PostgresItemReader extends JdbcCursorItemReader<DocumentRow> {
                 WHERE
                     status in ('UPLOADED')
                     AND pdf_link IS NOT NULL
+                    AND deleted = True
                     AND deleted_on > '$timestamp'::timestamp - interval '1 week'
             )
             SELECT
