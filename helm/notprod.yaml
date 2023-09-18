@@ -3,16 +3,16 @@ jobs:
   csIngests:
     enabled: true
     schedule: '5 8 * * *'
-    imageTag: 2.0.1
+    imageTag: 2.0.3
   csDeletes:
     enabled: true
     schedule: '5 8 * * *'
-    imageTag: 2.0.1
+    imageTag: 2.0.3
   wcsIngests:
     enabled: true
     schedule: '5 8 * * *'
-    imageTag: 2.0.1
+    imageTag: 2.0.3
   wcsDeletes:
     enabled: true
     schedule: '5 8 * * *'
-    imageTag: 2.0.1
+    imageTag: 2.0.3
